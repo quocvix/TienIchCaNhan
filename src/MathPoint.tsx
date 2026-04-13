@@ -139,12 +139,17 @@ export default function ScoreTrackerFlexiblePlayers() {
 
   const handlePlayerNameChange = (id: number, value: string) => {
     setPlayers((prev) =>
-      prev.map((player, index) =>
-        player.id === id
-          ? {
-              ...player,
-              name: value || `Người chơi ${index + 1}`,
-            }
+      prev.map((player) =>
+        player.id === id ? { ...player, name: value } : player
+      )
+    );
+  };
+
+  const handlePlayerNameBlur = (id: number, index: number) => {
+    setPlayers((prev) =>
+      prev.map((player) =>
+        player.id === id && player.name.trim() === ""
+          ? { ...player, name: `Người chơi ${index + 1}` }
           : player
       )
     );
@@ -330,6 +335,7 @@ export default function ScoreTrackerFlexiblePlayers() {
                       type="text"
                       value={player.name}
                       onChange={(e) => handlePlayerNameChange(player.id, e.target.value)}
+                      onBlur={() => handlePlayerNameBlur(player.id, index)}
                       className="w-full rounded-2xl border border-slate-300 px-4 py-3 outline-none transition focus:border-slate-500"
                     />
                   </div>
