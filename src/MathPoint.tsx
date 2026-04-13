@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 const STORAGE_KEY = "score-tracker-flex-v1";
 const DEFAULT_PLAYER_COUNT = 4;
