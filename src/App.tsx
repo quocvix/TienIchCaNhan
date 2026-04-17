@@ -1,7 +1,12 @@
-import MathPoint from './MathPoint.tsx'
+import MathPoint from "./MathPoint.tsx";
+import { ThemeProvider } from "./components/theme-provider.tsx";
 
 function App() {
-  return <MathPoint />
+  return (
+    <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
+      <MathPoint />
+    </ThemeProvider>
+  );
 }
 
-export default App
+export default App;
