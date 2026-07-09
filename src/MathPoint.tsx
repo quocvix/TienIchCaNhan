@@ -1,168 +1,125 @@
-import React, { useState } from 'react';
-import { Plus, X } from 'lucide-react';
+import React from "react";
+import { Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 
 export default function MathPoint() {
-  const [scoringType, setScoringType] = useState<'nhatnhi' | 'thutu'>('thutu');
 
-  return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-[#0a0a0a] text-white font-sans sm:hidden">
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-white/5">
-        <div className="flex items-center gap-3">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#1c1c1e] text-red-500 hover:bg-[#2a2a2c] hover:text-red-400"
-          >
-            <Plus size={24} strokeWidth={2.5} />
-          </Button>
-          <div className="flex flex-col">
-            <h1 className="text-xl font-bold leading-tight">Tiến Lên</h1>
-            <span className="text-[10px] font-semibold tracking-wider text-gray-500 uppercase">
-              Tạo bàn chơi mới
-            </span>
-          </div>
+    return (
+        <div className="fixed inset-0 z-50 flex flex-col bg-[#0a0a0a] text-white font-sans sm:hidden">
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b border-white/5">
+                <div className="flex items-center gap-3">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#1c1c1e] text-red-500 hover:bg-[#2a2a2c] hover:text-red-400"
+                    >
+                        <Plus size={24} strokeWidth={2.5} />
+                    </Button>
+                    <div className="flex flex-col">
+                        <h1 className="text-xl font-bold leading-tight">
+                            Tiến Lên
+                        </h1>
+                        <span className="text-[10px] font-semibold tracking-wider text-gray-500 uppercase">
+                            Tạo bàn chơi mới
+                        </span>
+                    </div>
+                </div>
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="flex h-10 w-10 items-center justify-center rounded-full bg-[#1c1c1e] text-gray-400 hover:bg-[#2a2a2c] hover:text-gray-300"
+                >
+                    <X size={20} />
+                </Button>
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 overflow-y-auto p-4 pb-24">
+                {/* Win/Lose Points */}
+                <div className="mb-8">
+                    <h2 className="mb-4 text-xs font-bold tracking-wider text-gray-500 uppercase">
+                        Hệ số / Điểm thắng thua
+                    </h2>
+                    <div className="grid grid-cols-4 gap-3">
+                        {[
+                            { label: "NHẤT", value: "3" },
+                            { label: "NHÌ", value: "2" },
+                            { label: "BA", value: "1" },
+                            { label: "BÉT", value: "0" },
+                        ].map((item, idx) => (
+                            <div key={idx} className="flex flex-col gap-2">
+                                <Label className="justify-center text-center text-[10px] font-bold tracking-wider text-gray-500 uppercase">
+                                    {item.label}
+                                </Label>
+                                <Input
+                                    type="text"
+                                    defaultValue={item.value}
+                                    className="w-full h-auto rounded-xl bg-[#1c1c1e] border-white/5 py-3 text-center text-lg font-bold text-white focus-visible:ring-1 focus-visible:ring-gray-500 focus-visible:border-transparent"
+                                />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Penalty Points */}
+                <div className="mb-8">
+                    <h2 className="mb-4 text-xs font-bold tracking-wider text-gray-500 uppercase">
+                        Phạt thối/chặt (Hệ số/điểm)
+                    </h2>
+                    <div className="grid grid-cols-3 gap-3 gap-y-4">
+                        {[
+                            { label: "HEO CƠ", value: "4" },
+                            { label: "HEO RÔ", value: "3" },
+                            { label: "HEO CHUỒN", value: "2" },
+                            { label: "HEO BÍCH", value: "1" },
+                            { label: "ĐÔI THÔNG", value: "4" },
+                            { label: "VỀ TRẮNG", value: "6" },
+                        ].map((item, idx) => (
+                            <div key={idx} className="flex flex-col gap-2">
+                                <Label className="text-left text-[10px] font-bold tracking-wider text-gray-500 uppercase ml-1">
+                                    {item.label}
+                                </Label>
+                                <Input
+                                    type="text"
+                                    defaultValue={item.value}
+                                    className="w-full h-auto rounded-xl bg-[#1c1c1e] border-white/5 py-3 px-4 text-left text-lg font-bold text-white focus-visible:ring-1 focus-visible:ring-gray-500 focus-visible:border-transparent"
+                                />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Info Card */}
+                <Card className="rounded-2xl bg-[#1c1c1e] border-none text-sm text-gray-300 shadow-none">
+                    <CardContent className="p-5">
+                        <p className="text-gray-300 leading-relaxed">
+                            <strong className="text-white">
+                                Chế độ Tiến Lên:
+                            </strong>{" "}
+                            Ghi điểm theo kết quả về đích. Bạn nhận điểm số quy định tương ứng với mỗi thứ hạng, không phụ thuộc người chơi khác.
+                        </p>
+                    </CardContent>
+                </Card>
+            </div>
+
+            {/* Footer */}
+            <div className="fixed bottom-0 left-0 right-0 bg-[#0a0a0a] p-4 border-t border-white/5">
+                <div className="grid grid-cols-2 gap-3 mx-auto">
+                    <Button
+                        variant="secondary"
+                        className="h-auto rounded-xl bg-[#2a2a2a] py-4 text-sm font-bold text-white hover:bg-[#3a3a3a]"
+                    >
+                        Hủy
+                    </Button>
+                    <Button className="h-auto rounded-xl bg-gradient-to-r from-red-600 to-red-500 py-4 text-sm font-bold text-white shadow-[0_0_20px_rgba(239,68,68,0.3)] hover:from-red-500 hover:to-red-400 hover:text-white">
+                        Tạo bàn
+                    </Button>
+                </div>
+            </div>
         </div>
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-[#1c1c1e] text-gray-400 hover:bg-[#2a2a2c] hover:text-gray-300"
-        >
-          <X size={20} />
-        </Button>
-      </div>
-
-      {/* Content */}
-      <div className="flex-1 overflow-y-auto p-4 pb-24">
-        {/* Scoring Type */}
-        <div className="mb-8">
-          <h2 className="mb-4 text-xs font-bold tracking-wider text-gray-500 uppercase">
-            Kiểu tính điểm
-          </h2>
-          <div className="grid grid-cols-2 gap-3">
-            <Button
-              variant="ghost"
-              onClick={() => setScoringType('nhatnhi')}
-              className={`h-auto rounded-xl py-3.5 text-sm font-semibold transition-all hover:bg-transparent ${
-                scoringType === 'nhatnhi'
-                  ? 'bg-gradient-to-r from-red-600 to-red-500 text-white shadow-[0_0_15px_rgba(239,68,68,0.4)] hover:text-white'
-                  : 'bg-[#1c1c1e] text-gray-400 border border-white/5 hover:text-gray-300'
-              }`}
-            >
-              Nhất nhì ăn
-            </Button>
-            <Button
-              variant="ghost"
-              onClick={() => setScoringType('thutu')}
-              className={`h-auto rounded-xl py-3.5 text-sm font-semibold transition-all hover:bg-transparent ${
-                scoringType === 'thutu'
-                  ? 'bg-gradient-to-r from-red-600 to-red-500 text-white shadow-[0_0_15px_rgba(239,68,68,0.4)] hover:text-white'
-                  : 'bg-[#1c1c1e] text-gray-400 border border-white/5 hover:text-gray-300'
-              }`}
-            >
-              Thứ tự
-            </Button>
-          </div>
-        </div>
-
-        {/* Win/Lose Points */}
-        <div className="mb-8">
-          <h2 className="mb-4 text-xs font-bold tracking-wider text-gray-500 uppercase">
-            Hệ số / Điểm thắng thua
-          </h2>
-          <div className="grid grid-cols-4 gap-3">
-            {[
-              { label: 'NHẤT', value: '3' },
-              { label: 'NHÌ', value: '2' },
-              { label: 'BA', value: '1' },
-              { label: 'BÉT', value: '0' },
-            ].map((item, idx) => (
-              <div key={idx} className="flex flex-col gap-2">
-                <Label className="text-center text-[10px] font-bold tracking-wider text-gray-500 uppercase">
-                  {item.label}
-                </Label>
-                <Input
-                  type="text"
-                  defaultValue={item.value}
-                  className="w-full h-auto rounded-xl bg-[#1c1c1e] border-white/5 py-3 text-center text-lg font-bold text-white focus-visible:ring-1 focus-visible:ring-gray-500 focus-visible:border-transparent"
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Penalty Points */}
-        <div className="mb-8">
-          <h2 className="mb-4 text-xs font-bold tracking-wider text-gray-500 uppercase">
-            Phạt thối/chặt (Hệ số/điểm)
-          </h2>
-          <div className="grid grid-cols-3 gap-3 gap-y-4">
-            {[
-              { label: 'HEO CƠ', value: '4' },
-              { label: 'HEO RÔ', value: '3' },
-              { label: 'HEO CHUỒN', value: '2' },
-              { label: 'HEO BÍCH', value: '1' },
-              { label: 'ĐÔI THÔNG', value: '4' },
-              { label: 'VỀ TRẮNG', value: '6' },
-            ].map((item, idx) => (
-              <div key={idx} className="flex flex-col gap-2">
-                <Label className="text-left text-[10px] font-bold tracking-wider text-gray-500 uppercase ml-1">
-                  {item.label}
-                </Label>
-                <Input
-                  type="text"
-                  defaultValue={item.value}
-                  className="w-full h-auto rounded-xl bg-[#1c1c1e] border-white/5 py-3 px-4 text-left text-lg font-bold text-white focus-visible:ring-1 focus-visible:ring-gray-500 focus-visible:border-transparent"
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Info Card */}
-        <Card className="rounded-2xl bg-[#1c1c1e] border-none text-sm text-gray-300 shadow-none">
-          <CardContent className="p-5">
-            <p className="mb-3 text-gray-300">
-              <strong className="text-white">Chế độ Tiến Lên:</strong> Ghi điểm theo kết quả về đích.
-            </p>
-            <ul className="flex flex-col gap-3">
-              <li className="flex items-start gap-2">
-                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-red-500" />
-                <p className="text-gray-400 leading-relaxed">
-                  <strong className="text-white">Nhất nhì ăn:</strong> Nhất và Nhì sẽ thu tiền cược của Ba và Bét (kiểu chơi tổng bằng 0).
-                </p>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-red-500" />
-                <p className="text-gray-400 leading-relaxed">
-                  <strong className="text-white">Thứ tự:</strong> Bạn nhận điểm số quy định tương ứng với mỗi thứ hạng, không phụ thuộc người chơi khác.
-                </p>
-              </li>
-            </ul>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Footer */}
-      <div className="fixed bottom-0 left-0 right-0 bg-[#0a0a0a] p-4 border-t border-white/5">
-        <div className="grid grid-cols-[1fr_1.5fr] gap-3 max-w-md mx-auto">
-          <Button 
-            variant="secondary" 
-            className="h-auto rounded-xl bg-[#2a2a2a] py-4 text-sm font-bold text-white hover:bg-[#3a3a3a]"
-          >
-            Hủy
-          </Button>
-          <Button 
-            className="h-auto rounded-xl bg-gradient-to-r from-red-600 to-red-500 py-4 text-sm font-bold text-white shadow-[0_0_20px_rgba(239,68,68,0.3)] hover:from-red-500 hover:to-red-400 hover:text-white"
-          >
-            Tạo bàn
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
+    );
 }
