@@ -78,8 +78,11 @@ export default function CreateGameDrawer() {
                         {[
                             { label: "HEO ĐỎ", value: "4" },
                             { label: "HEO ĐEN", value: "2" },
-                            // { label: "TỨ ĐÔI", value: "2" },
-                            // { label: "ĐÔI THÔNG", value: "4" },
+                            { label: "CHẶT HEO ĐỎ", value: "4" },
+                            { label: "CHẶT HEO ĐEN", value: "2" },
+                            { label: "CHẾT HEO ĐỎ", value: "2" },
+                            { label: "CHẾT HEO ĐEN", value: "1" },
+                            { label: "CHẾT CHÁY", value: "4" },
                         ].map((item, idx) => (
                             <div key={idx} className="flex flex-col gap-2">
                                 <Label className="text-left text-[10px] font-bold tracking-wider text-gray-500 uppercase ml-1">
@@ -96,7 +99,7 @@ export default function CreateGameDrawer() {
                 </div>
 
                 {/* Info Card */}
-                <Card className="rounded-2xl bg-[#1c1c1e] border-none text-sm text-gray-300 shadow-none">
+                {/* <Card className="rounded-2xl bg-[#1c1c1e] border-none text-sm text-gray-300 shadow-none">
                     <CardContent className="p-5">
                         <p className="text-gray-300 leading-relaxed">
                             <strong className="text-white">
@@ -105,7 +108,7 @@ export default function CreateGameDrawer() {
                             Ghi điểm theo kết quả về đích. Bạn nhận điểm số quy định tương ứng với mỗi thứ hạng, không phụ thuộc người chơi khác.
                         </p>
                     </CardContent>
-                </Card>
+                </Card> */}
             </div>
 
             {/* Footer */}

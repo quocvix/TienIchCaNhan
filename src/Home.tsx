@@ -2,6 +2,7 @@ import { Settings, Plus, Spade, Trash2 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import CreateGameDrawer from "./CreateGameDrawer.tsx";
+import pokerIcon from "./assets/icons8-poker-94.png";
 
 export default function Home() {
   return (
@@ -27,16 +28,10 @@ export default function Home() {
             className="mt-4 relative bg-[#d60000] rounded-[2rem] p-6 flex items-center justify-between cursor-pointer overflow-hidden shadow-[0_4px_30px_rgba(214,0,0,0.3)] active:scale-95 transition-transform"
           >
             <div className="relative z-10 w-[88px] h-[88px] bg-white rounded-2xl flex items-center justify-center shadow-inner overflow-hidden">
-                {/* Simple representation of cards */}
-                <div className="flex gap-1 -rotate-12 transform scale-150">
-                    <span className="text-3xl filter drop-shadow-md">🂡</span>
-                    <span className="text-3xl filter drop-shadow-md -ml-4">🂢</span>
-                    <span className="text-3xl filter drop-shadow-md -ml-4">🂣</span>
-                    <span className="text-3xl filter drop-shadow-md -ml-4">🂤</span>
-                </div>
+                <img className="w-full h-full object-cover" src={pokerIcon} alt="playing-cards"/>
             </div>
             <div className="relative z-10 flex items-center gap-1 pr-2">
-                <span className="text-[32px] font-bold text-white tracking-tight leading-none">Tiến Lên</span>
+                <span className="text-[32px] font-bold text-white tracking-tight leading-none">Tạo Ván Mới</span>
                 <Plus size={36} className="text-white" strokeWidth={2} />
             </div>
           </div>
@@ -71,9 +66,6 @@ export default function Home() {
                 </div>
                 <div className="text-[20px] font-bold text-white leading-none mt-0.5">
                   {item.time}
-                </div>
-                <div className="text-[11px] text-gray-500 font-bold tracking-wide mt-0.5">
-                  CƯỢC: {item.bet}
                 </div>
               </div>
             </div>
