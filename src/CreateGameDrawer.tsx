@@ -2,17 +2,21 @@ import { Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
-import { DrawerClose } from "@/components/ui/drawer";
+import {
+    DrawerClose,
+    DrawerDescription,
+    DrawerFooter,
+    DrawerHeader,
+    DrawerTitle,
+} from "@/components/ui/drawer";
 import { useNavigate } from "react-router-dom";
 
 export default function CreateGameDrawer() {
     const navigate = useNavigate();
 
     return (
-        <div className="flex flex-col h-[90vh] bg-[#0a0a0a] text-white font-sans sm:hidden">
-            {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-white/5 shrink-0">
+        <>
+            <DrawerHeader className="flex flex-row items-center justify-between p-4 border-b border-white/5 shrink-0 text-left">
                 <div className="flex items-center gap-3">
                     <Button
                         variant="ghost"
@@ -21,13 +25,13 @@ export default function CreateGameDrawer() {
                     >
                         <Plus size={24} strokeWidth={2.5} />
                     </Button>
-                    <div className="flex flex-col">
-                        <h1 className="text-xl font-bold leading-tight">
+                    <div className="flex flex-col text-left">
+                        <DrawerTitle className="text-xl font-bold leading-tight text-white">
                             Tiến Lên
-                        </h1>
-                        <span className="text-[10px] font-semibold tracking-wider text-gray-500 uppercase">
+                        </DrawerTitle>
+                        <DrawerDescription className="text-[10px] font-semibold tracking-wider text-gray-500 uppercase">
                             Tạo bàn chơi mới
-                        </span>
+                        </DrawerDescription>
                     </div>
                 </div>
                 <DrawerClose asChild>
@@ -39,10 +43,10 @@ export default function CreateGameDrawer() {
                         <X size={20} />
                     </Button>
                 </DrawerClose>
-            </div>
+            </DrawerHeader>
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto p-4 pb-6">
+            <div className="flex-1 no-scrollbar overflow-y-auto p-4 pb-6">
                 {/* Win/Lose Points */}
                 <div className="mb-8">
                     <h2 className="mb-4 text-xs font-bold tracking-wider text-gray-500 uppercase">
@@ -97,23 +101,11 @@ export default function CreateGameDrawer() {
                         ))}
                     </div>
                 </div>
-
-                {/* Info Card */}
-                {/* <Card className="rounded-2xl bg-[#1c1c1e] border-none text-sm text-gray-300 shadow-none">
-                    <CardContent className="p-5">
-                        <p className="text-gray-300 leading-relaxed">
-                            <strong className="text-white">
-                                Chế độ Tiến Lên:
-                            </strong>{" "}
-                            Ghi điểm theo kết quả về đích. Bạn nhận điểm số quy định tương ứng với mỗi thứ hạng, không phụ thuộc người chơi khác.
-                        </p>
-                    </CardContent>
-                </Card> */}
             </div>
 
             {/* Footer */}
-            <div className="p-4 border-t border-white/5 shrink-0 bg-[#0a0a0a]">
-                <div className="grid grid-cols-2 gap-3 mx-auto">
+            <DrawerFooter className="p-4 border-t border-white/5 shrink-0 bg-[#0a0a0a]">
+                <div className="grid grid-cols-2 gap-3 mx-auto w-full">
                     <DrawerClose asChild>
                         <Button
                             variant="secondary"
@@ -123,15 +115,15 @@ export default function CreateGameDrawer() {
                         </Button>
                     </DrawerClose>
                     <DrawerClose asChild>
-                        <Button 
-                            onClick={() => navigate('/room')}
+                        <Button
+                            onClick={() => navigate("/room")}
                             className="h-auto rounded-xl bg-gradient-to-r from-red-600 to-red-500 py-4 text-sm font-bold text-white shadow-[0_0_20px_rgba(239,68,68,0.3)] hover:from-red-500 hover:to-red-400 hover:text-white"
                         >
                             Tạo bàn
                         </Button>
                     </DrawerClose>
                 </div>
-            </div>
-        </div>
+            </DrawerFooter>
+        </>
     );
 }
