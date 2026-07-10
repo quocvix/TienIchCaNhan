@@ -1,16 +1,18 @@
-import React from "react";
 import { Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
+import { DrawerClose } from "@/components/ui/drawer";
+import { useNavigate } from "react-router-dom";
 
-export default function MathPoint() {
+export default function CreateGameDrawer() {
+    const navigate = useNavigate();
 
     return (
-        <div className="fixed inset-0 z-50 flex flex-col bg-[#0a0a0a] text-white font-sans sm:hidden">
+        <div className="flex flex-col h-[90vh] bg-[#0a0a0a] text-white font-sans sm:hidden">
             {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-white/5">
+            <div className="flex items-center justify-between p-4 border-b border-white/5 shrink-0">
                 <div className="flex items-center gap-3">
                     <Button
                         variant="ghost"
@@ -28,17 +30,19 @@ export default function MathPoint() {
                         </span>
                     </div>
                 </div>
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="flex h-10 w-10 items-center justify-center rounded-full bg-[#1c1c1e] text-gray-400 hover:bg-[#2a2a2c] hover:text-gray-300"
-                >
-                    <X size={20} />
-                </Button>
+                <DrawerClose asChild>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="flex h-10 w-10 items-center justify-center rounded-full bg-[#1c1c1e] text-gray-400 hover:bg-[#2a2a2c] hover:text-gray-300"
+                    >
+                        <X size={20} />
+                    </Button>
+                </DrawerClose>
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto p-4 pb-24">
+            <div className="flex-1 overflow-y-auto p-4 pb-6">
                 {/* Win/Lose Points */}
                 <div className="mb-8">
                     <h2 className="mb-4 text-xs font-bold tracking-wider text-gray-500 uppercase">
@@ -46,10 +50,10 @@ export default function MathPoint() {
                     </h2>
                     <div className="grid grid-cols-4 gap-3">
                         {[
-                            { label: "NHẤT", value: "3" },
-                            { label: "NHÌ", value: "2" },
-                            { label: "BA", value: "1" },
-                            { label: "BÉT", value: "0" },
+                            { label: "NHẤT", value: "4" },
+                            { label: "NHÌ", value: "3" },
+                            { label: "BA", value: "2" },
+                            { label: "BÉT", value: "1" },
                         ].map((item, idx) => (
                             <div key={idx} className="flex flex-col gap-2">
                                 <Label className="justify-center text-center text-[10px] font-bold tracking-wider text-gray-500 uppercase">
@@ -72,12 +76,10 @@ export default function MathPoint() {
                     </h2>
                     <div className="grid grid-cols-3 gap-3 gap-y-4">
                         {[
-                            { label: "HEO CƠ", value: "4" },
-                            { label: "HEO RÔ", value: "3" },
-                            { label: "HEO CHUỒN", value: "2" },
-                            { label: "HEO BÍCH", value: "1" },
-                            { label: "ĐÔI THÔNG", value: "4" },
-                            { label: "VỀ TRẮNG", value: "6" },
+                            { label: "HEO ĐỎ", value: "4" },
+                            { label: "HEO ĐEN", value: "2" },
+                            // { label: "TỨ ĐÔI", value: "2" },
+                            // { label: "ĐÔI THÔNG", value: "4" },
                         ].map((item, idx) => (
                             <div key={idx} className="flex flex-col gap-2">
                                 <Label className="text-left text-[10px] font-bold tracking-wider text-gray-500 uppercase ml-1">
@@ -107,17 +109,24 @@ export default function MathPoint() {
             </div>
 
             {/* Footer */}
-            <div className="fixed bottom-0 left-0 right-0 bg-[#0a0a0a] p-4 border-t border-white/5">
+            <div className="p-4 border-t border-white/5 shrink-0 bg-[#0a0a0a]">
                 <div className="grid grid-cols-2 gap-3 mx-auto">
-                    <Button
-                        variant="secondary"
-                        className="h-auto rounded-xl bg-[#2a2a2a] py-4 text-sm font-bold text-white hover:bg-[#3a3a3a]"
-                    >
-                        Hủy
-                    </Button>
-                    <Button className="h-auto rounded-xl bg-gradient-to-r from-red-600 to-red-500 py-4 text-sm font-bold text-white shadow-[0_0_20px_rgba(239,68,68,0.3)] hover:from-red-500 hover:to-red-400 hover:text-white">
-                        Tạo bàn
-                    </Button>
+                    <DrawerClose asChild>
+                        <Button
+                            variant="secondary"
+                            className="h-auto rounded-xl bg-[#2a2a2a] py-4 text-sm font-bold text-white hover:bg-[#3a3a3a]"
+                        >
+                            Hủy
+                        </Button>
+                    </DrawerClose>
+                    <DrawerClose asChild>
+                        <Button 
+                            onClick={() => navigate('/room')}
+                            className="h-auto rounded-xl bg-gradient-to-r from-red-600 to-red-500 py-4 text-sm font-bold text-white shadow-[0_0_20px_rgba(239,68,68,0.3)] hover:from-red-500 hover:to-red-400 hover:text-white"
+                        >
+                            Tạo bàn
+                        </Button>
+                    </DrawerClose>
                 </div>
             </div>
         </div>
