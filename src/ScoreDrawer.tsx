@@ -1,11 +1,34 @@
 import { useState } from "react";
-import { X, Trophy, AlertTriangle, CheckCircle2 } from "lucide-react";
+import {
+    X,
+    Trophy,
+    AlertTriangle,
+    CheckCircle2,
+    Pencil,
+    Trash2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { DrawerClose, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
+import {
+    DrawerClose,
+    DrawerTitle,
+    DrawerDescription,
+} from "@/components/ui/drawer";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface ScoreDrawerProps {
     players: string[];
     onConfirm: (scores: Record<string, number>, details?: any) => void;
+    onDelete?: () => void;
     initialData?: {
         ranks?: Record<string, Rank | null>;
         anHeoSelection?: Record<string, { do: number; den: number }>;
@@ -14,6 +37,7 @@ interface ScoreDrawerProps {
         chetChaySelection?: Record<string, "an" | "chay" | "">;
         doiThongSelection?: Record<string, { an: number; phat: number }>;
     };
+    roundNumber?: number;
 }
 
 type Rank = "NHẤT" | "NHÌ" | "BA" | "BÉT";
@@ -27,14 +51,32 @@ const rankStyles: Record<Rank, { bg: string; text: string; label: string }> = {
     BÉT: { bg: "bg-[#6b5b4b]", text: "text-white", label: "BÉT" },
 };
 
-export default function ScoreDrawer({ players, onConfirm, initialData }: ScoreDrawerProps) {
-    const [ranks, setRanks] = useState<Record<string, Rank | null>>(initialData?.ranks || {});
+export default function ScoreDrawer({
+    players,
+    onConfirm,
+    initialData,
+    roundNumber,
+    onDelete,
+}: ScoreDrawerProps) {
+    const [ranks, setRanks] = useState<Record<string, Rank | null>>(
+        initialData?.ranks || {},
+    );
     const [activeTab, setActiveTab] = useState<string>("ĂN PHẠT HEO");
-    const [anHeoSelection, setAnHeoSelection] = useState<Record<string, { do: number; den: number }>>(initialData?.anHeoSelection || {});
-    const [phatHeoSelection, setPhatHeoSelection] = useState<Record<string, { do: number; den: number }>>(initialData?.phatHeoSelection || {});
-    const [chetHeoSelection, setChetHeoSelection] = useState<Record<string, { do: number; den: number }>>(initialData?.chetHeoSelection || {});
-    const [chetChaySelection, setChetChaySelection] = useState<Record<string, "an" | "chay" | "">>(initialData?.chetChaySelection || {});
-    const [doiThongSelection, setDoiThongSelection] = useState<Record<string, { an: number; phat: number }>>(initialData?.doiThongSelection || {});
+    const [anHeoSelection, setAnHeoSelection] = useState<
+        Record<string, { do: number; den: number }>
+    >(initialData?.anHeoSelection || {});
+    const [phatHeoSelection, setPhatHeoSelection] = useState<
+        Record<string, { do: number; den: number }>
+    >(initialData?.phatHeoSelection || {});
+    const [chetHeoSelection, setChetHeoSelection] = useState<
+        Record<string, { do: number; den: number }>
+    >(initialData?.chetHeoSelection || {});
+    const [chetChaySelection, setChetChaySelection] = useState<
+        Record<string, "an" | "chay" | "">
+    >(initialData?.chetChaySelection || {});
+    const [doiThongSelection, setDoiThongSelection] = useState<
+        Record<string, { an: number; phat: number }>
+    >(initialData?.doiThongSelection || {});
 
     const getGameSettings = () => {
         const query = new URLSearchParams(window.location.search);
@@ -89,13 +131,27 @@ export default function ScoreDrawer({ players, onConfirm, initialData }: ScoreDr
         }
     };
 
-    const toggleHeo = (name: string, color: "do" | "den", type: "an" | "phat" | "chet") => {
-        const selection = type === "an" ? anHeoSelection : type === "phat" ? phatHeoSelection : chetHeoSelection;
-        const setSelection = type === "an" ? setAnHeoSelection : type === "phat" ? setPhatHeoSelection : setChetHeoSelection;
+    const toggleHeo = (
+        name: string,
+        color: "do" | "den",
+        type: "an" | "phat" | "chet",
+    ) => {
+        const selection =
+            type === "an"
+                ? anHeoSelection
+                : type === "phat"
+                  ? phatHeoSelection
+                  : chetHeoSelection;
+        const setSelection =
+            type === "an"
+                ? setAnHeoSelection
+                : type === "phat"
+                  ? setPhatHeoSelection
+                  : setChetHeoSelection;
 
         const current = selection[name] || { do: 0, den: 0 };
         const currentCount = current[color];
-        
+
         let nextCount = 0;
         if (currentCount === 0) {
             nextCount = 1;
@@ -109,15 +165,15 @@ export default function ScoreDrawer({ players, onConfirm, initialData }: ScoreDr
             ...selection,
             [name]: {
                 ...current,
-                [color]: nextCount
-            }
+                [color]: nextCount,
+            },
         });
     };
 
     const toggleDoiThong = (name: string, type: "an" | "phat") => {
         const current = doiThongSelection[name] || { an: 0, phat: 0 };
         const currentCount = current[type];
-        
+
         let nextCount = 0;
         if (currentCount < 5) {
             nextCount = currentCount + 1;
@@ -129,70 +185,71 @@ export default function ScoreDrawer({ players, onConfirm, initialData }: ScoreDr
             ...doiThongSelection,
             [name]: {
                 ...current,
-                [type]: nextCount
-            }
+                [type]: nextCount,
+            },
         });
     };
 
     const clearDoiThong = (name: string) => {
         setDoiThongSelection({
             ...doiThongSelection,
-            [name]: { an: 0, phat: 0 }
-        });
-    };
-
-    const clearHeo = (name: string) => {
-        setAnHeoSelection({
-            ...anHeoSelection,
-            [name]: { do: 0, den: 0 }
-        });
-        setPhatHeoSelection({
-            ...phatHeoSelection,
-            [name]: { do: 0, den: 0 }
+            [name]: { an: 0, phat: 0 },
         });
     };
 
     const clearAnHeo = (name: string) => {
         setAnHeoSelection({
             ...anHeoSelection,
-            [name]: { do: 0, den: 0 }
+            [name]: { do: 0, den: 0 },
         });
     };
 
     const clearPhatHeo = (name: string) => {
         setPhatHeoSelection({
             ...phatHeoSelection,
-            [name]: { do: 0, den: 0 }
+            [name]: { do: 0, den: 0 },
         });
     };
 
     const clearChetHeo = (name: string) => {
         setChetHeoSelection({
             ...chetHeoSelection,
-            [name]: { do: 0, den: 0 }
+            [name]: { do: 0, den: 0 },
         });
     };
 
     const clearChetChay = (name: string) => {
         setChetChaySelection({
             ...chetChaySelection,
-            [name]: ""
+            [name]: "",
         });
     };
 
     const hasActiveData = (tabName: string): boolean => {
         if (tabName === "ĂN PHẠT HEO") {
-            return Object.values(anHeoSelection).some(v => v && (v.do > 0 || v.den > 0)) ||
-                   Object.values(phatHeoSelection).some(v => v && (v.do > 0 || v.den > 0));
+            return (
+                Object.values(anHeoSelection).some(
+                    (v) => v && (v.do > 0 || v.den > 0),
+                ) ||
+                Object.values(phatHeoSelection).some(
+                    (v) => v && (v.do > 0 || v.den > 0),
+                )
+            );
         }
         if (tabName === "CHẾT HEO") {
-            return Object.values(chetHeoSelection).some(v => v && (v.do > 0 || v.den > 0));
+            return Object.values(chetHeoSelection).some(
+                (v) => v && (v.do > 0 || v.den > 0),
+            );
         }
         if (tabName === "CHẾT CHÁY") {
-            return Object.values(chetChaySelection).some(val => val === "an" || val === "chay");
+            return Object.values(chetChaySelection).some(
+                (val) => val === "an" || val === "chay",
+            );
         }
         if (tabName === "ĐÔI THÔNG") {
-            return Object.values(doiThongSelection).some(val => val && (val.an > 0 || val.phat > 0));
+            return Object.values(doiThongSelection).some(
+                (val) => val && (val.an > 0 || val.phat > 0),
+            );
         }
         return false;
     };
@@ -222,7 +279,7 @@ export default function ScoreDrawer({ players, onConfirm, initialData }: ScoreDr
         const settings = getGameSettings();
         return {
             do: settings?.penalties?.heoDo ?? 4,
-            den: settings?.penalties?.heoDen ?? 2
+            den: settings?.penalties?.heoDen ?? 2,
         };
     };
 
@@ -281,13 +338,14 @@ export default function ScoreDrawer({ players, onConfirm, initialData }: ScoreDr
         const settings = getGameSettings();
         return {
             do: settings?.penalties?.chetHeoDo ?? 2,
-            den: settings?.penalties?.chetHeoDen ?? 1
+            den: settings?.penalties?.chetHeoDen ?? 1,
         };
     };
 
     // Tất cả người chơi KHÔNG bị cháy phải được xếp hạng
     const activePlayers = players.filter((p) => !isPlayerBurned(p));
-    const allRanked = activePlayers.length > 0 && activePlayers.every((p) => ranks[p]);
+    const allRanked =
+        activePlayers.length > 0 && activePlayers.every((p) => ranks[p]);
 
     const handleConfirm = () => {
         if (!allRanked) return;
@@ -301,7 +359,7 @@ export default function ScoreDrawer({ players, onConfirm, initialData }: ScoreDr
             phatHeoSelection,
             chetHeoSelection,
             chetChaySelection,
-            doiThongSelection
+            doiThongSelection,
         });
     };
 
@@ -310,15 +368,30 @@ export default function ScoreDrawer({ players, onConfirm, initialData }: ScoreDr
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-white/5 shrink-0 bg-[#0f0f12]">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-emerald-950/40 flex items-center justify-center text-emerald-500">
-                        <Trophy size={20} />
-                    </div>
+                    {initialData ? (
+                        <div className="w-10 h-10 rounded-xl bg-orange-950/40 flex items-center justify-center text-orange-500">
+                            <Pencil size={20} />
+                        </div>
+                    ) : (
+                        <div className="w-10 h-10 rounded-xl bg-emerald-950/40 flex items-center justify-center text-emerald-500">
+                            <Trophy size={20} />
+                        </div>
+                    )}
                     <div className="flex flex-col">
-                        <DrawerTitle className="text-lg font-bold leading-tight text-white">
-                            Ghi điểm
+                        <DrawerTitle className="text-lg font-bold leading-tight text-white flex items-center gap-2">
+                            <span>
+                                {initialData ? "Chỉnh sửa" : "Ghi điểm"}
+                            </span>
+                            {initialData && roundNumber && (
+                                <span className="text-xs font-semibold px-2 py-0.5 rounded bg-orange-500/20 text-orange-400 border border-orange-500/20">
+                                    ván #{roundNumber}
+                                </span>
+                            )}
                         </DrawerTitle>
                         <DrawerDescription className="text-[10px] text-gray-500 font-medium">
-                            Kết thúc ván Tiến Lên
+                            {initialData
+                                ? "Sửa kết quả ván Tiến Lên"
+                                : "Kết thúc ván Tiến Lên"}
                         </DrawerDescription>
                     </div>
                 </div>
@@ -383,27 +456,30 @@ export default function ScoreDrawer({ players, onConfirm, initialData }: ScoreDr
                         Tùy chọn phạt / thưởng
                     </h3>
                     <div className="flex flex-wrap gap-2">
-                        {["CHẾT CHÁY", "ĂN PHẠT HEO", "CHẾT HEO", "ĐÔI THÔNG"].map(
-                            (item) => {
-                                const isSelected = activeTab === item;
-                                return (
-                                    <button
-                                        key={item}
-                                        onClick={() => setActiveTab(item)}
-                                        className={`px-4 py-2 rounded-xl text-xs uppercase font-bold transition-all border relative ${
-                                            isSelected
-                                                ? "bg-[#00a67d] text-white border-[#00a67d]"
-                                                : "bg-transparent text-gray-400 border-white/10 hover:border-white/20"
-                                        }`}
-                                    >
-                                        {item}
-                                        {hasActiveData(item) && (
-                                            <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-emerald-400 border border-[#0a0a0a]" />
-                                        )}
-                                    </button>
-                                );
-                            },
-                        )}
+                        {[
+                            "CHẾT CHÁY",
+                            "ĂN PHẠT HEO",
+                            "CHẾT HEO",
+                            "ĐÔI THÔNG",
+                        ].map((item) => {
+                            const isSelected = activeTab === item;
+                            return (
+                                <button
+                                    key={item}
+                                    onClick={() => setActiveTab(item)}
+                                    className={`px-4 py-2 rounded-xl text-xs uppercase font-bold transition-all border relative ${
+                                        isSelected
+                                            ? "bg-[#00a67d] text-white border-[#00a67d]"
+                                            : "bg-transparent text-gray-400 border-white/10 hover:border-white/20"
+                                    }`}
+                                >
+                                    {item}
+                                    {hasActiveData(item) && (
+                                        <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-emerald-400 border border-[#0a0a0a]" />
+                                    )}
+                                </button>
+                            );
+                        })}
                     </div>
 
                     {/* Active Tab Panel */}
@@ -415,20 +491,31 @@ export default function ScoreDrawer({ players, onConfirm, initialData }: ScoreDr
                                     <span className="w-16 text-[10px] font-bold text-gray-500 uppercase tracking-wider"></span>
                                     <div className="flex-1 flex items-center">
                                         <div className="flex-1 flex justify-center">
-                                            <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-wider">Ăn</span>
+                                            <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-wider">
+                                                Ăn
+                                            </span>
                                         </div>
                                         <div className="w-px h-4 bg-white/10 mx-1"></div>
                                         <div className="flex-1 flex justify-center">
-                                            <span className="text-[10px] font-bold text-red-400 uppercase tracking-wider">Phạt</span>
+                                            <span className="text-[10px] font-bold text-red-400 uppercase tracking-wider">
+                                                Phạt
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
                                 {players.map((name) => {
-                                    const anSelection = anHeoSelection[name] || { do: 0, den: 0 };
-                                    const phatSelection = phatHeoSelection[name] || { do: 0, den: 0 };
+                                    const anSelection = anHeoSelection[
+                                        name
+                                    ] || { do: 0, den: 0 };
+                                    const phatSelection = phatHeoSelection[
+                                        name
+                                    ] || { do: 0, den: 0 };
 
                                     return (
-                                        <div key={name} className="flex items-center py-2.5 border-t border-white/[0.04]">
+                                        <div
+                                            key={name}
+                                            className="flex items-center py-2.5 border-t border-white/[0.04]"
+                                        >
                                             <span className="w-16 text-sm font-bold text-gray-300 truncate pr-2">
                                                 {name}
                                             </span>
@@ -437,16 +524,24 @@ export default function ScoreDrawer({ players, onConfirm, initialData }: ScoreDr
                                                 <div className="flex-1 flex justify-center items-center gap-2">
                                                     <div className="relative">
                                                         <button
-                                                            onClick={() => toggleHeo(name, "do", "an")}
+                                                            onClick={() =>
+                                                                toggleHeo(
+                                                                    name,
+                                                                    "do",
+                                                                    "an",
+                                                                )
+                                                            }
                                                             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
-                                                                anSelection.do > 0
+                                                                anSelection.do >
+                                                                0
                                                                     ? "bg-red-500/20 text-red-400 border-red-500/30"
                                                                     : "bg-transparent text-gray-600 border-white/5 hover:border-white/10"
                                                             }`}
                                                         >
                                                             Đỏ
                                                         </button>
-                                                        {anSelection.do === 2 && (
+                                                        {anSelection.do ===
+                                                            2 && (
                                                             <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white ring-2 ring-[#151517]">
                                                                 2
                                                             </span>
@@ -454,16 +549,24 @@ export default function ScoreDrawer({ players, onConfirm, initialData }: ScoreDr
                                                     </div>
                                                     <div className="relative">
                                                         <button
-                                                            onClick={() => toggleHeo(name, "den", "an")}
+                                                            onClick={() =>
+                                                                toggleHeo(
+                                                                    name,
+                                                                    "den",
+                                                                    "an",
+                                                                )
+                                                            }
                                                             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
-                                                                anSelection.den > 0
+                                                                anSelection.den >
+                                                                0
                                                                     ? "bg-white/20 text-white border-white/30"
                                                                     : "bg-transparent text-gray-600 border-white/5 hover:border-white/10"
                                                             }`}
                                                         >
                                                             Đen
                                                         </button>
-                                                        {anSelection.den === 2 && (
+                                                        {anSelection.den ===
+                                                            2 && (
                                                             <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-gray-500 text-[9px] font-bold text-white ring-2 ring-[#151517]">
                                                                 2
                                                             </span>
@@ -471,9 +574,13 @@ export default function ScoreDrawer({ players, onConfirm, initialData }: ScoreDr
                                                     </div>
                                                     {/* Clear Ăn Heo */}
                                                     <button
-                                                        onClick={() => clearAnHeo(name)}
+                                                        onClick={() =>
+                                                            clearAnHeo(name)
+                                                        }
                                                         className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all text-gray-600 hover:text-red-400 bg-transparent ${
-                                                            anSelection.do > 0 || anSelection.den > 0
+                                                            anSelection.do >
+                                                                0 ||
+                                                            anSelection.den > 0
                                                                 ? "opacity-100 cursor-pointer"
                                                                 : "opacity-30 pointer-events-none"
                                                         }`}
@@ -487,16 +594,24 @@ export default function ScoreDrawer({ players, onConfirm, initialData }: ScoreDr
                                                 <div className="flex-1 flex justify-center items-center gap-2">
                                                     <div className="relative">
                                                         <button
-                                                            onClick={() => toggleHeo(name, "do", "phat")}
+                                                            onClick={() =>
+                                                                toggleHeo(
+                                                                    name,
+                                                                    "do",
+                                                                    "phat",
+                                                                )
+                                                            }
                                                             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
-                                                                phatSelection.do > 0
+                                                                phatSelection.do >
+                                                                0
                                                                     ? "bg-red-500/20 text-red-400 border-red-500/30"
                                                                     : "bg-transparent text-gray-600 border-white/5 hover:border-white/10"
                                                             }`}
                                                         >
                                                             Đỏ
                                                         </button>
-                                                        {phatSelection.do === 2 && (
+                                                        {phatSelection.do ===
+                                                            2 && (
                                                             <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white ring-2 ring-[#151517]">
                                                                 2
                                                             </span>
@@ -504,16 +619,24 @@ export default function ScoreDrawer({ players, onConfirm, initialData }: ScoreDr
                                                     </div>
                                                     <div className="relative">
                                                         <button
-                                                            onClick={() => toggleHeo(name, "den", "phat")}
+                                                            onClick={() =>
+                                                                toggleHeo(
+                                                                    name,
+                                                                    "den",
+                                                                    "phat",
+                                                                )
+                                                            }
                                                             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
-                                                                phatSelection.den > 0
+                                                                phatSelection.den >
+                                                                0
                                                                     ? "bg-white/20 text-white border-white/30"
                                                                     : "bg-transparent text-gray-600 border-white/5 hover:border-white/10"
                                                             }`}
                                                         >
                                                             Đen
                                                         </button>
-                                                        {phatSelection.den === 2 && (
+                                                        {phatSelection.den ===
+                                                            2 && (
                                                             <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-gray-500 text-[9px] font-bold text-white ring-2 ring-[#151517]">
                                                                 2
                                                             </span>
@@ -521,9 +644,14 @@ export default function ScoreDrawer({ players, onConfirm, initialData }: ScoreDr
                                                     </div>
                                                     {/* Clear Phạt Heo */}
                                                     <button
-                                                        onClick={() => clearPhatHeo(name)}
+                                                        onClick={() =>
+                                                            clearPhatHeo(name)
+                                                        }
                                                         className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all text-gray-600 hover:text-red-400 bg-transparent ${
-                                                            phatSelection.do > 0 || phatSelection.den > 0
+                                                            phatSelection.do >
+                                                                0 ||
+                                                            phatSelection.den >
+                                                                0
                                                                 ? "opacity-100 cursor-pointer"
                                                                 : "opacity-30 pointer-events-none"
                                                         }`}
@@ -542,20 +670,35 @@ export default function ScoreDrawer({ players, onConfirm, initialData }: ScoreDr
                             <div className="flex flex-col gap-0">
                                 {/* Header */}
                                 <div className="flex items-center py-2 mb-1">
-                                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Người chơi</span>
-                                    <span className="ml-auto text-[10px] font-bold text-gray-500 uppercase tracking-wider">Thối Heo (Trừ điểm)</span>
+                                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+                                        Người chơi
+                                    </span>
+                                    <span className="ml-auto text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+                                        Thối Heo (Trừ điểm)
+                                    </span>
                                 </div>
                                 {players.map((name) => {
-                                    const selection = chetHeoSelection[name] || { do: 0, den: 0 };
+                                    const selection = chetHeoSelection[
+                                        name
+                                    ] || { do: 0, den: 0 };
                                     return (
-                                        <div key={name} className="flex justify-between items-center py-2.5 border-t border-white/[0.04]">
+                                        <div
+                                            key={name}
+                                            className="flex justify-between items-center py-2.5 border-t border-white/[0.04]"
+                                        >
                                             <span className="text-sm font-bold text-gray-300">
                                                 {name}
                                             </span>
                                             <div className="flex items-center gap-2">
                                                 <div className="relative">
                                                     <button
-                                                        onClick={() => toggleHeo(name, "do", "chet")}
+                                                        onClick={() =>
+                                                            toggleHeo(
+                                                                name,
+                                                                "do",
+                                                                "chet",
+                                                            )
+                                                        }
                                                         className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
                                                             selection.do > 0
                                                                 ? "bg-red-500/20 text-red-400 border-red-500/30"
@@ -572,7 +715,13 @@ export default function ScoreDrawer({ players, onConfirm, initialData }: ScoreDr
                                                 </div>
                                                 <div className="relative">
                                                     <button
-                                                        onClick={() => toggleHeo(name, "den", "chet")}
+                                                        onClick={() =>
+                                                            toggleHeo(
+                                                                name,
+                                                                "den",
+                                                                "chet",
+                                                            )
+                                                        }
                                                         className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
                                                             selection.den > 0
                                                                 ? "bg-white/20 text-white border-white/30"
@@ -589,9 +738,12 @@ export default function ScoreDrawer({ players, onConfirm, initialData }: ScoreDr
                                                 </div>
                                                 {/* Clear Button */}
                                                 <button
-                                                    onClick={() => clearChetHeo(name)}
+                                                    onClick={() =>
+                                                        clearChetHeo(name)
+                                                    }
                                                     className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all text-gray-600 hover:text-red-400 bg-transparent ${
-                                                        selection.do > 0 || selection.den > 0
+                                                        selection.do > 0 ||
+                                                        selection.den > 0
                                                             ? "opacity-100 cursor-pointer"
                                                             : "opacity-30 pointer-events-none"
                                                     }`}
@@ -608,16 +760,25 @@ export default function ScoreDrawer({ players, onConfirm, initialData }: ScoreDr
                         {activeTab === "CHẾT CHÁY" && (
                             <div className="flex flex-col gap-3">
                                 <div className="flex items-center justify-between mb-1">
-                                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Người chơi</span>
-                                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Hệ số: {getChetChayPenalty()} điểm</span>
+                                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+                                        Người chơi
+                                    </span>
+                                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+                                        Hệ số: {getChetChayPenalty()} điểm
+                                    </span>
                                 </div>
                                 {players.map((name) => {
-                                    const status = chetChaySelection[name] || "";
+                                    const status =
+                                        chetChaySelection[name] || "";
                                     const isAn = status === "an";
                                     const isChay = status === "chay";
 
-                                    const handleToggle = (type: "an" | "chay") => {
-                                        const newSelection = { ...chetChaySelection };
+                                    const handleToggle = (
+                                        type: "an" | "chay",
+                                    ) => {
+                                        const newSelection = {
+                                            ...chetChaySelection,
+                                        };
 
                                         if (type === "an") {
                                             if (isAn) {
@@ -625,8 +786,14 @@ export default function ScoreDrawer({ players, onConfirm, initialData }: ScoreDr
                                                 newSelection[name] = "";
                                             } else {
                                                 // Xóa người ăn cũ (chỉ 1 người được ăn)
-                                                Object.keys(newSelection).forEach((key) => {
-                                                    if (newSelection[key] === "an") newSelection[key] = "";
+                                                Object.keys(
+                                                    newSelection,
+                                                ).forEach((key) => {
+                                                    if (
+                                                        newSelection[key] ===
+                                                        "an"
+                                                    )
+                                                        newSelection[key] = "";
                                                 });
                                                 newSelection[name] = "an";
                                             }
@@ -637,7 +804,9 @@ export default function ScoreDrawer({ players, onConfirm, initialData }: ScoreDr
                                                 newSelection[name] = "chay";
                                                 // Nếu bị cháy -> xóa rank đã chọn
                                                 if (ranks[name]) {
-                                                    const newRanks = { ...ranks };
+                                                    const newRanks = {
+                                                        ...ranks,
+                                                    };
                                                     delete newRanks[name];
                                                     setRanks(newRanks);
                                                 }
@@ -648,15 +817,26 @@ export default function ScoreDrawer({ players, onConfirm, initialData }: ScoreDr
                                     };
 
                                     return (
-                                        <div key={name} className="flex justify-between items-center py-2">
-                                            <span className={`text-sm font-bold ${
-                                                isAn ? "text-emerald-400" : isChay ? "text-red-400" : "text-gray-300"
-                                            }`}>
+                                        <div
+                                            key={name}
+                                            className="flex justify-between items-center py-2"
+                                        >
+                                            <span
+                                                className={`text-sm font-bold ${
+                                                    isAn
+                                                        ? "text-emerald-400"
+                                                        : isChay
+                                                          ? "text-red-400"
+                                                          : "text-gray-300"
+                                                }`}
+                                            >
                                                 {name}
                                             </span>
                                             <div className="flex items-center gap-2">
                                                 <button
-                                                    onClick={() => handleToggle("an")}
+                                                    onClick={() =>
+                                                        handleToggle("an")
+                                                    }
                                                     className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
                                                         isAn
                                                             ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
@@ -666,7 +846,9 @@ export default function ScoreDrawer({ players, onConfirm, initialData }: ScoreDr
                                                     ĂN
                                                 </button>
                                                 <button
-                                                    onClick={() => handleToggle("chay")}
+                                                    onClick={() =>
+                                                        handleToggle("chay")
+                                                    }
                                                     className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
                                                         isChay
                                                             ? "bg-red-500/20 text-red-400 border-red-500/30"
@@ -677,7 +859,9 @@ export default function ScoreDrawer({ players, onConfirm, initialData }: ScoreDr
                                                 </button>
                                                 {/* Clear Button */}
                                                 <button
-                                                    onClick={() => clearChetChay(name)}
+                                                    onClick={() =>
+                                                        clearChetChay(name)
+                                                    }
                                                     className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all text-gray-600 hover:text-red-400 bg-transparent ${
                                                         status !== ""
                                                             ? "opacity-100 cursor-pointer"
@@ -697,15 +881,25 @@ export default function ScoreDrawer({ players, onConfirm, initialData }: ScoreDr
                             <div className="flex flex-col gap-0">
                                 {/* Header */}
                                 <div className="flex items-center py-2 mb-1">
-                                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Người chơi</span>
-                                    <span className="ml-auto text-[10px] font-bold text-gray-500 uppercase tracking-wider">Ăn/Phạt (Hệ số: {getDoiThongPenalty()})</span>
+                                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+                                        Người chơi
+                                    </span>
+                                    <span className="ml-auto text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+                                        Ăn/Phạt (Hệ số: {getDoiThongPenalty()})
+                                    </span>
                                 </div>
                                 {players.map((name) => {
-                                    const selection = doiThongSelection[name] || { an: 0, phat: 0 };
-                                    const hasData = selection.an > 0 || selection.phat > 0;
+                                    const selection = doiThongSelection[
+                                        name
+                                    ] || { an: 0, phat: 0 };
+                                    const hasData =
+                                        selection.an > 0 || selection.phat > 0;
 
                                     return (
-                                        <div key={name} className="flex justify-between items-center py-2.5 border-t border-white/[0.04]">
+                                        <div
+                                            key={name}
+                                            className="flex justify-between items-center py-2.5 border-t border-white/[0.04]"
+                                        >
                                             <span className="text-sm font-bold text-gray-300">
                                                 {name}
                                             </span>
@@ -713,7 +907,12 @@ export default function ScoreDrawer({ players, onConfirm, initialData }: ScoreDr
                                                 {/* Button Ăn */}
                                                 <div className="relative">
                                                     <button
-                                                        onClick={() => toggleDoiThong(name, "an")}
+                                                        onClick={() =>
+                                                            toggleDoiThong(
+                                                                name,
+                                                                "an",
+                                                            )
+                                                        }
                                                         className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all border ${
                                                             selection.an > 0
                                                                 ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
@@ -731,7 +930,12 @@ export default function ScoreDrawer({ players, onConfirm, initialData }: ScoreDr
                                                 {/* Button Phạt */}
                                                 <div className="relative">
                                                     <button
-                                                        onClick={() => toggleDoiThong(name, "phat")}
+                                                        onClick={() =>
+                                                            toggleDoiThong(
+                                                                name,
+                                                                "phat",
+                                                            )
+                                                        }
                                                         className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all border ${
                                                             selection.phat > 0
                                                                 ? "bg-red-500/20 text-red-400 border-red-500/30"
@@ -748,9 +952,13 @@ export default function ScoreDrawer({ players, onConfirm, initialData }: ScoreDr
                                                 </div>
                                                 {/* Clear Button */}
                                                 <button
-                                                    onClick={() => clearDoiThong(name)}
+                                                    onClick={() =>
+                                                        clearDoiThong(name)
+                                                    }
                                                     className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all text-gray-600 hover:text-red-400 bg-transparent ${
-                                                        hasData ? "opacity-100 cursor-pointer" : "opacity-30 pointer-events-none"
+                                                        hasData
+                                                            ? "opacity-100 cursor-pointer"
+                                                            : "opacity-30 pointer-events-none"
                                                     }`}
                                                 >
                                                     <X size={14} />
@@ -780,7 +988,9 @@ export default function ScoreDrawer({ players, onConfirm, initialData }: ScoreDr
                                     className="flex justify-between items-center"
                                 >
                                     <div className="flex items-center gap-2">
-                                        <span className={`text-sm font-bold ${burned ? "text-red-400" : eater ? "text-emerald-400" : "text-gray-300"}`}>
+                                        <span
+                                            className={`text-sm font-bold ${burned ? "text-red-400" : eater ? "text-emerald-400" : "text-gray-300"}`}
+                                        >
                                             {name}
                                         </span>
                                         {burned && (
@@ -790,25 +1000,44 @@ export default function ScoreDrawer({ players, onConfirm, initialData }: ScoreDr
                                         )}
                                         {eater && burnedCount > 0 && (
                                             <span className="text-[9px] font-bold text-emerald-400/70 bg-emerald-500/10 px-1.5 py-0.5 rounded">
-                                                ĂN +{getChetChayPenalty() * burnedCount}
+                                                ĂN +
+                                                {getChetChayPenalty() *
+                                                    burnedCount}
                                             </span>
                                         )}
                                         {(() => {
                                             const heoValues = getHeoValues();
                                             const anHeo = anHeoSelection[name];
-                                            const phatHeo = phatHeoSelection[name];
+                                            const phatHeo =
+                                                phatHeoSelection[name];
                                             return (
                                                 <>
                                                     {anHeo && (
                                                         <>
                                                             {anHeo.do > 0 && (
                                                                 <span className="text-[9px] font-bold text-emerald-400/70 bg-emerald-500/10 px-1.5 py-0.5 rounded">
-                                                                    HEO ĐỎ{anHeo.do > 1 ? ` x${anHeo.do}` : ""} (+{heoValues.do * anHeo.do})
+                                                                    HEO ĐỎ
+                                                                    {anHeo.do >
+                                                                    1
+                                                                        ? ` x${anHeo.do}`
+                                                                        : ""}{" "}
+                                                                    (+
+                                                                    {heoValues.do *
+                                                                        anHeo.do}
+                                                                    )
                                                                 </span>
                                                             )}
                                                             {anHeo.den > 0 && (
                                                                 <span className="text-[9px] font-bold text-emerald-400/70 bg-emerald-500/10 px-1.5 py-0.5 rounded">
-                                                                    HEO ĐEN{anHeo.den > 1 ? ` x${anHeo.den}` : ""} (+{heoValues.den * anHeo.den})
+                                                                    HEO ĐEN
+                                                                    {anHeo.den >
+                                                                    1
+                                                                        ? ` x${anHeo.den}`
+                                                                        : ""}{" "}
+                                                                    (+
+                                                                    {heoValues.den *
+                                                                        anHeo.den}
+                                                                    )
                                                                 </span>
                                                             )}
                                                         </>
@@ -817,49 +1046,114 @@ export default function ScoreDrawer({ players, onConfirm, initialData }: ScoreDr
                                                         <>
                                                             {phatHeo.do > 0 && (
                                                                 <span className="text-[9px] font-bold text-rose-400/70 bg-rose-500/10 px-1.5 py-0.5 rounded">
-                                                                    PHẠT HEO ĐỎ{phatHeo.do > 1 ? ` x${phatHeo.do}` : ""} (-{heoValues.do * phatHeo.do})
+                                                                    PHẠT HEO ĐỎ
+                                                                    {phatHeo.do >
+                                                                    1
+                                                                        ? ` x${phatHeo.do}`
+                                                                        : ""}{" "}
+                                                                    (-
+                                                                    {heoValues.do *
+                                                                        phatHeo.do}
+                                                                    )
                                                                 </span>
                                                             )}
-                                                            {phatHeo.den > 0 && (
+                                                            {phatHeo.den >
+                                                                0 && (
                                                                 <span className="text-[9px] font-bold text-rose-400/70 bg-rose-500/10 px-1.5 py-0.5 rounded">
-                                                                    PHẠT HEO ĐEN{phatHeo.den > 1 ? ` x${phatHeo.den}` : ""} (-{heoValues.den * phatHeo.den})
+                                                                    PHẠT HEO ĐEN
+                                                                    {phatHeo.den >
+                                                                    1
+                                                                        ? ` x${phatHeo.den}`
+                                                                        : ""}{" "}
+                                                                    (-
+                                                                    {heoValues.den *
+                                                                        phatHeo.den}
+                                                                    )
                                                                 </span>
                                                             )}
                                                         </>
                                                     )}
                                                     {(() => {
-                                                        const chetHeoValues = getChetHeoValues();
-                                                        const chetHeo = chetHeoSelection[name];
-                                                        if (!chetHeo) return null;
+                                                        const chetHeoValues =
+                                                            getChetHeoValues();
+                                                        const chetHeo =
+                                                            chetHeoSelection[
+                                                                name
+                                                            ];
+                                                        if (!chetHeo)
+                                                            return null;
                                                         return (
                                                             <>
-                                                                {chetHeo.do > 0 && (
+                                                                {chetHeo.do >
+                                                                    0 && (
                                                                     <span className="text-[9px] font-bold text-rose-400/70 bg-rose-500/10 px-1.5 py-0.5 rounded">
-                                                                        THỐI HEO ĐỎ{chetHeo.do > 1 ? ` x${chetHeo.do}` : ""} (-{chetHeoValues.do * chetHeo.do})
+                                                                        THỐI HEO
+                                                                        ĐỎ
+                                                                        {chetHeo.do >
+                                                                        1
+                                                                            ? ` x${chetHeo.do}`
+                                                                            : ""}{" "}
+                                                                        (-
+                                                                        {chetHeoValues.do *
+                                                                            chetHeo.do}
+                                                                        )
                                                                     </span>
                                                                 )}
-                                                                {chetHeo.den > 0 && (
+                                                                {chetHeo.den >
+                                                                    0 && (
                                                                     <span className="text-[9px] font-bold text-rose-400/70 bg-rose-500/10 px-1.5 py-0.5 rounded">
-                                                                        THỐI HEO ĐEN{chetHeo.den > 1 ? ` x${chetHeo.den}` : ""} (-{chetHeoValues.den * chetHeo.den})
+                                                                        THỐI HEO
+                                                                        ĐEN
+                                                                        {chetHeo.den >
+                                                                        1
+                                                                            ? ` x${chetHeo.den}`
+                                                                            : ""}{" "}
+                                                                        (-
+                                                                        {chetHeoValues.den *
+                                                                            chetHeo.den}
+                                                                        )
                                                                     </span>
                                                                 )}
                                                             </>
                                                         );
                                                     })()}
                                                     {(() => {
-                                                        const dtValue = getDoiThongPenalty();
-                                                        const dt = doiThongSelection[name];
+                                                        const dtValue =
+                                                            getDoiThongPenalty();
+                                                        const dt =
+                                                            doiThongSelection[
+                                                                name
+                                                            ];
                                                         if (!dt) return null;
                                                         return (
                                                             <>
                                                                 {dt.an > 0 && (
                                                                     <span className="text-[9px] font-bold text-emerald-400/70 bg-emerald-500/10 px-1.5 py-0.5 rounded">
-                                                                        ĐÔI THÔNG{dt.an > 1 ? ` x${dt.an}` : ""} (+{dtValue * dt.an})
+                                                                        ĐÔI
+                                                                        THÔNG
+                                                                        {dt.an >
+                                                                        1
+                                                                            ? ` x${dt.an}`
+                                                                            : ""}{" "}
+                                                                        (+
+                                                                        {dtValue *
+                                                                            dt.an}
+                                                                        )
                                                                     </span>
                                                                 )}
-                                                                {dt.phat > 0 && (
+                                                                {dt.phat >
+                                                                    0 && (
                                                                     <span className="text-[9px] font-bold text-rose-400/70 bg-rose-500/10 px-1.5 py-0.5 rounded">
-                                                                        PHẠT ĐÔI THÔNG{dt.phat > 1 ? ` x${dt.phat}` : ""} (-{dtValue * dt.phat})
+                                                                        PHẠT ĐÔI
+                                                                        THÔNG
+                                                                        {dt.phat >
+                                                                        1
+                                                                            ? ` x${dt.phat}`
+                                                                            : ""}{" "}
+                                                                        (-
+                                                                        {dtValue *
+                                                                            dt.phat}
+                                                                        )
                                                                     </span>
                                                                 )}
                                                             </>
@@ -896,20 +1190,64 @@ export default function ScoreDrawer({ players, onConfirm, initialData }: ScoreDr
                     </div>
                 )}
 
-                <DrawerClose asChild disabled={!allRanked}>
-                    <Button
-                        onClick={handleConfirm}
+                <div className="flex gap-3 w-full">
+                    {initialData && onDelete && (
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button
+                                    variant="ghost"
+                                    className="h-14 px-4 rounded-2xl bg-red-950/20 hover:bg-red-950/40 text-red-500 border border-red-500/20 flex items-center justify-center shrink-0 active:scale-95 transition-transform"
+                                >
+                                    <Trash2 size={20} className="size-5" />
+                                </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent
+                                size="sm"
+                                className="bg-[#0a0a0a] border-white/5 text-white max-w-[90vw] rounded-2xl"
+                            >
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle className="text-lg font-bold text-white">
+                                        Xác nhận xóa ván đấu
+                                    </AlertDialogTitle>
+                                    <AlertDialogDescription className="text-sm text-gray-400">
+                                        Bạn có chắc chắn muốn xóa ván #
+                                        {roundNumber} này không? Hành động này
+                                        không thể hoàn tác.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel className="h-11 bg-transparent hover:bg-white/5 border border-white/10 rounded-xl text-white">
+                                        Hủy
+                                    </AlertDialogCancel>
+                                    <AlertDialogAction
+                                        onClick={onDelete}
+                                        className="h-11 bg-red-600 hover:bg-red-500 text-white rounded-xl font-bold shadow-lg shadow-red-600/20 border-0"
+                                    >
+                                        Xóa
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                    )}
+                    <DrawerClose
+                        asChild
                         disabled={!allRanked}
-                        className={`w-full h-14 rounded-2xl flex items-center justify-center gap-2 font-bold text-base transition-all ${
-                            allRanked
-                                ? "bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-600/20 active:scale-95"
-                                : "bg-emerald-950/30 text-emerald-900/60 cursor-not-allowed"
-                        }`}
+                        className="flex-1"
                     >
-                        <CheckCircle2 size={18} />
-                        Xác nhận ghi điểm
-                    </Button>
-                </DrawerClose>
+                        <Button
+                            onClick={handleConfirm}
+                            disabled={!allRanked}
+                            className={`w-full h-14 rounded-2xl flex items-center justify-center gap-2 font-bold text-base transition-all ${
+                                allRanked
+                                    ? "bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-600/20 active:scale-95"
+                                    : "bg-emerald-950/30 text-emerald-900/60 cursor-not-allowed"
+                            }`}
+                        >
+                            <CheckCircle2 size={18} />
+                            Xác nhận ghi điểm
+                        </Button>
+                    </DrawerClose>
+                </div>
             </div>
         </div>
     );

@@ -1,13 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-    ArrowLeft,
-    Undo2,
-    Settings,
-    UserPlus,
-    Plus,
-    X,
-    Trophy,
-} from "lucide-react";
+import { ArrowLeft, UserPlus, Plus, RotateCcw, Flag, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import {
@@ -15,11 +7,20 @@ import {
     DrawerContent,
     DrawerTrigger,
     DrawerClose,
-    DrawerTitle,
-    DrawerDescription,
 } from "@/components/ui/drawer";
 import AddPlayerDrawer from "./AddPlayerDrawer.tsx";
 import ScoreDrawer from "./ScoreDrawer.tsx";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export default function GameRoom() {
     const navigate = useNavigate();
@@ -53,19 +54,9 @@ export default function GameRoom() {
         null,
     );
     const [isScoreDrawerOpen, setIsScoreDrawerOpen] = useState(false);
+    const [isReportOpen, setIsReportOpen] = useState(false);
 
-    const getGameSettings = () => {
-        if (!gameId) return null;
-        const stored = localStorage.getItem("game_history");
-        if (stored) {
-            const games = JSON.parse(stored);
-            const found = games.find((g: any) => g.id === gameId);
-            if (found && found.settings) return found.settings;
-        }
-        return null;
-    };
-
-    const [time, setTime] = useState(() => {
+    const [time] = useState(() => {
         if (!gameId) return "09/07 17:33";
         const stored = localStorage.getItem("game_history");
         if (stored) {
@@ -162,6 +153,48 @@ export default function GameRoom() {
         }
     };
 
+    const handleDeleteRound = () => {
+        if (editingRoundIndex === null) return;
+
+        const newHistory = history.filter(
+            (_, idx) => idx !== editingRoundIndex,
+        );
+        setHistory(newHistory);
+        setIsScoreDrawerOpen(false);
+        setEditingRoundIndex(null);
+
+        if (gameId) {
+            const stored = localStorage.getItem("game_history");
+            if (stored) {
+                const games = JSON.parse(stored);
+                const updated = games.map((g: any) => {
+                    if (g.id === gameId) {
+                        return { ...g, history: newHistory };
+                    }
+                    return g;
+                });
+                localStorage.setItem("game_history", JSON.stringify(updated));
+            }
+        }
+    };
+
+    const handleResetHistory = () => {
+        setHistory([]);
+        if (gameId) {
+            const stored = localStorage.getItem("game_history");
+            if (stored) {
+                const games = JSON.parse(stored);
+                const updated = games.map((g: any) => {
+                    if (g.id === gameId) {
+                        return { ...g, history: [] };
+                    }
+                    return g;
+                });
+                localStorage.setItem("game_history", JSON.stringify(updated));
+            }
+        }
+    };
+
     const getPlayerTotal = (name: string) => {
         return history.reduce((sum, round) => {
             const roundScores = round.scores || round;
@@ -191,7 +224,7 @@ export default function GameRoom() {
                     onClick={() => navigate(-1)}
                     variant="ghost"
                     size="icon"
-                    className="h-10 w-10 rounded-full bg-[#1c1c1e] text-gray-400 hover:bg-[#2a2a2c] hover:text-white"
+                    className="h-11 w-11 rounded-full bg-[#1c1c1e] text-gray-400 hover:bg-[#2a2a2c] hover:text-white"
                 >
                     <ArrowLeft size={20} />
                 </Button>
@@ -204,20 +237,79 @@ export default function GameRoom() {
                 </div>
 
                 <div className="flex items-center gap-2">
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-10 w-10 rounded-full bg-[#1c1c1e] text-gray-400 hover:bg-[#2a2a2c] hover:text-white"
-                    >
-                        <Undo2 size={18} />
-                    </Button>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-10 w-10 rounded-full bg-[#1c1c1e] text-gray-400 hover:bg-[#2a2a2c] hover:text-white"
-                    >
-                        <Settings size={18} />
-                    </Button>
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-10 w-10 rounded-xl bg-orange-950/40 text-orange-500 hover:bg-orange-950/40 hover:text-orange-500"
+                            >
+                                <Flag size={18} className="size-[18px]" />
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent
+                            size="sm"
+                            className="bg-[#0a0a0a] border-white/5 text-white max-w-[90vw] rounded-2xl"
+                        >
+                            <AlertDialogHeader>
+                                <AlertDialogTitle className="text-lg font-bold text-white text-center">
+                                    Xem báo cáo tổng kết?
+                                </AlertDialogTitle>
+                                <AlertDialogDescription className="text-sm text-gray-400 text-center">
+                                    Xác nhận hiển thị bảng báo cáo điểm số chi
+                                    tiết của tất cả người chơi.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter className="flex gap-3 mt-4">
+                                <AlertDialogCancel className="flex-1 h-11 bg-transparent hover:bg-white/5 border border-white/10 rounded-xl text-white">
+                                    Hủy
+                                </AlertDialogCancel>
+                                <AlertDialogAction
+                                    onClick={() => setIsReportOpen(true)}
+                                    className="flex-1 h-11 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold shadow-lg shadow-emerald-600/20 border-0"
+                                >
+                                    Xem
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-10 w-10 rounded-xl bg-[#1c1c1e] text-gray-400 hover:bg-[#2a2a2c] hover:text-white"
+                            >
+                                <RotateCcw size={18} className="size-[18px]" />
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent
+                            size="sm"
+                            className="bg-[#0a0a0a] border-white/5 text-white max-w-[90vw] rounded-2xl"
+                        >
+                            <AlertDialogHeader>
+                                <AlertDialogTitle className="text-lg font-bold text-white text-center">
+                                    Làm mới ván chơi?
+                                </AlertDialogTitle>
+                                <AlertDialogDescription className="text-sm text-gray-400 text-center">
+                                    Hành động này sẽ xóa toàn bộ lịch sử điểm số
+                                    của ván đấu hiện tại và không thể hoàn tác.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter className="flex gap-3 mt-4">
+                                <AlertDialogCancel className="flex-1 h-11 bg-transparent hover:bg-white/5 border border-white/10 rounded-xl text-white">
+                                    Hủy
+                                </AlertDialogCancel>
+                                <AlertDialogAction
+                                    onClick={handleResetHistory}
+                                    className="flex-1 h-11 bg-red-600 hover:bg-red-500 text-white rounded-xl font-bold shadow-lg shadow-red-600/20 border-0"
+                                >
+                                    Làm mới
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
                 </div>
             </div>
 
@@ -264,22 +356,21 @@ export default function GameRoom() {
                                     className={`flex-1  grid gap-3 ${players.length === 2 ? "grid-cols-2" : players.length === 3 ? "grid-cols-3" : "grid-cols-4"}`}
                                 >
                                     {players.map((name, idx) => {
-                                        const total = getPlayerTotal(name);
                                         return (
                                             <div
                                                 key={idx}
                                                 className="bg-[#151517] border rounded-xl flex flex-col items-center justify-center py-3 gap-2 shadow-sm"
                                             >
-                                                <span className="text-[16px] font-bold text-gray-500 uppercase tracking-widest truncate max-w-full px-1">
+                                                <span className="text-[16px] font-bold text-gray-200 uppercase tracking-widest truncate max-w-full px-1">
                                                     {name}
                                                 </span>
-                                                <span
+                                                {/* <span
                                                     className={`text-[16px] font-black ${total > 0 ? "text-emerald-500" : total < 0 ? "text-[#ff3333]" : "text-gray-400"}`}
                                                 >
                                                     {total > 0
                                                         ? `+${total}`
                                                         : total}
-                                                </span>
+                                                </span> */}
                                             </div>
                                         );
                                     })}
@@ -384,12 +475,124 @@ export default function GameRoom() {
                                         ? history[editingRoundIndex]?.details
                                         : undefined
                                 }
+                                roundNumber={
+                                    editingRoundIndex !== null
+                                        ? editingRoundIndex + 1
+                                        : undefined
+                                }
                                 onConfirm={handleConfirmScore}
+                                onDelete={handleDeleteRound}
                             />
                         </DrawerContent>
                     </Drawer>
                 )}
             </div>
+
+            <Drawer open={isReportOpen} onOpenChange={setIsReportOpen}>
+                <DrawerContent className="bg-[#0a0a0a] border-white/5 outline-none overflow-hidden p-0 h-[80vh] data-[vaul-drawer-direction=bottom]:max-h-[80vh]">
+                    <div className="flex flex-col h-full text-white font-sans">
+                        {/* Header */}
+                        <div className="flex items-center justify-between p-4 border-b border-white/5 shrink-0 bg-[#0f0f12]">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-xl bg-orange-950/40 flex items-center justify-center text-orange-500">
+                                    <Flag size={20} />
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="text-lg font-bold leading-tight text-white">
+                                        Báo cáo tổng kết
+                                    </span>
+                                    <span className="text-[10px] text-gray-500 font-medium">
+                                        Tổng số ván đã đấu: {roundCount}
+                                    </span>
+                                </div>
+                            </div>
+                            <DrawerClose asChild>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="flex h-9 w-9 items-center justify-center rounded-full bg-[#1c1c1e] text-gray-400 hover:bg-[#2a2a2c] hover:text-gray-300"
+                                >
+                                    <X size={18} />
+                                </Button>
+                            </DrawerClose>
+                        </div>
+
+                        {/* Content */}
+                        <div className="flex-1 overflow-y-auto p-4 space-y-6">
+                            {/* Player Rankings List */}
+                            <div className="space-y-3">
+                                {players
+                                    .map((name) => {
+                                        const total = getPlayerTotal(name);
+                                        return { name, total };
+                                    })
+                                    .sort((a, b) => b.total - a.total)
+                                    .map((player, idx) => {
+                                        const isWinner =
+                                            idx === 0 && player.total > 0;
+                                        const isLoser =
+                                            idx === players.length - 1 &&
+                                            player.total < 0;
+                                        return (
+                                            <div
+                                                key={idx}
+                                                className="bg-[#151517] border border-white/5 rounded-2xl p-4 flex items-center justify-between"
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    <div
+                                                        className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm ${
+                                                            isWinner
+                                                                ? "bg-emerald-500/20 text-emerald-400"
+                                                                : isLoser
+                                                                  ? "bg-rose-500/20 text-rose-400"
+                                                                  : "bg-white/5 text-gray-400"
+                                                        }`}
+                                                    >
+                                                        {idx + 1}
+                                                    </div>
+                                                    <div className="flex flex-col">
+                                                        <span className="text-base font-bold text-white uppercase">
+                                                            {player.name}
+                                                        </span>
+                                                        <span className="text-xs text-gray-500">
+                                                            {isWinner
+                                                                ? "👑 Người dẫn đầu"
+                                                                : isLoser
+                                                                  ? ""
+                                                                  : ""}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <span
+                                                    className={`text-lg font-black ${
+                                                        player.total > 0
+                                                            ? "text-emerald-500"
+                                                            : player.total < 0
+                                                              ? "text-rose-500"
+                                                              : "text-gray-400"
+                                                    }`}
+                                                >
+                                                    {player.total > 0
+                                                        ? `${player.total}`
+                                                        : player.total}
+                                                </span>
+                                            </div>
+                                        );
+                                    })}
+                            </div>
+                        </div>
+
+                        {/* Footer */}
+                        <div className="p-4 border-t border-white/5 shrink-0 bg-[#0f0f12]">
+                            <DrawerClose asChild>
+                                <Button className="w-full h-12 rounded-xl bg-white/10 hover:bg-white/15 text-white font-bold">
+                                    Đóng báo cáo
+                                </Button>
+                            </DrawerClose>
+                        </div>
+                    </div>
+                </DrawerContent>
+            </Drawer>
         </div>
     );
 }
