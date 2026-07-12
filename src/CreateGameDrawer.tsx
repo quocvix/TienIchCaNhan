@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +14,52 @@ import { useNavigate } from "react-router-dom";
 
 export default function CreateGameDrawer() {
     const navigate = useNavigate();
+
+    const [nhat, setNhat] = useState("4");
+    const [nhi, setNhi] = useState("3");
+    const [ba, setBa] = useState("2");
+    const [bet, setBet] = useState("1");
+
+    const [heoDo, setHeoDo] = useState("4");
+    const [heoDen, setHeoDen] = useState("2");
+    const [chetHeoDo, setChetHeoDo] = useState("2");
+    const [chetHeoDen, setChetHeoDen] = useState("1");
+    const [chetChay, setChetChay] = useState("4");
+    const [doiThong, setDoiThong] = useState("4");
+
+    const handleCreateGame = () => {
+        const id = Date.now().toString();
+        const now = new Date();
+        const time = `${String(now.getDate()).padStart(2, "0")}/${String(now.getMonth() + 1).padStart(2, "0")} ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+
+        const newGame = {
+            id,
+            time,
+            players: [],
+            history: [],
+            settings: {
+                nhat: parseInt(nhat) || 0,
+                nhi: parseInt(nhi) || 0,
+                ba: parseInt(ba) || 0,
+                bet: parseInt(bet) || 0,
+                penalties: {
+                    heoDo: parseInt(heoDo) || 0,
+                    heoDen: parseInt(heoDen) || 0,
+                    chetHeoDo: parseInt(chetHeoDo) || 0,
+                    chetHeoDen: parseInt(chetHeoDen) || 0,
+                    chetChay: parseInt(chetChay) || 0,
+                    doiThong: parseInt(doiThong) || 0,
+                },
+            },
+        };
+
+        const stored = localStorage.getItem("game_history");
+        const games = stored ? JSON.parse(stored) : [];
+        games.unshift(newGame);
+        localStorage.setItem("game_history", JSON.stringify(games));
+
+        navigate(`/room?id=${id}`);
+    };
 
     return (
         <>
@@ -54,10 +101,30 @@ export default function CreateGameDrawer() {
                     </h2>
                     <div className="grid grid-cols-4 gap-3">
                         {[
-                            { label: "NHẤT", value: "4" },
-                            { label: "NHÌ", value: "3" },
-                            { label: "BA", value: "2" },
-                            { label: "BÉT", value: "1" },
+                            {
+                                label: "NHẤT",
+                                value: "4",
+                                stateVal: nhat,
+                                setVal: setNhat,
+                            },
+                            {
+                                label: "NHÌ",
+                                value: "3",
+                                stateVal: nhi,
+                                setVal: setNhi,
+                            },
+                            {
+                                label: "BA",
+                                value: "2",
+                                stateVal: ba,
+                                setVal: setBa,
+                            },
+                            {
+                                label: "BÉT",
+                                value: "1",
+                                stateVal: bet,
+                                setVal: setBet,
+                            },
                         ].map((item, idx) => (
                             <div key={idx} className="flex flex-col gap-2">
                                 <Label className="justify-center text-center text-[10px] font-bold tracking-wider text-gray-500 uppercase">
@@ -65,7 +132,10 @@ export default function CreateGameDrawer() {
                                 </Label>
                                 <Input
                                     type="text"
-                                    defaultValue={item.value}
+                                    value={item.stateVal}
+                                    onChange={(e) =>
+                                        item.setVal(e.target.value)
+                                    }
                                     className="w-full h-auto rounded-xl bg-[#1c1c1e] border-white/5 py-3 text-center text-lg font-bold text-white focus-visible:ring-1 focus-visible:ring-gray-500 focus-visible:border-transparent"
                                 />
                             </div>
@@ -80,13 +150,32 @@ export default function CreateGameDrawer() {
                     </h2>
                     <div className="grid grid-cols-3 gap-3 gap-y-4">
                         {[
-                            { label: "HEO ĐỎ", value: "4" },
-                            { label: "HEO ĐEN", value: "2" },
-                            { label: "CHẶT HEO ĐỎ", value: "4" },
-                            { label: "CHẶT HEO ĐEN", value: "2" },
-                            { label: "CHẾT HEO ĐỎ", value: "2" },
-                            { label: "CHẾT HEO ĐEN", value: "1" },
-                            { label: "CHẾT CHÁY", value: "4" },
+                            { label: "HEO ĐỎ", value: heoDo, setVal: setHeoDo },
+                            {
+                                label: "HEO ĐEN",
+                                value: heoDen,
+                                setVal: setHeoDen,
+                            },
+                            {
+                                label: "CHẾT HEO ĐỎ",
+                                value: chetHeoDo,
+                                setVal: setChetHeoDo,
+                            },
+                            {
+                                label: "CHẾT HEO ĐEN",
+                                value: chetHeoDen,
+                                setVal: setChetHeoDen,
+                            },
+                            {
+                                label: "CHẾT CHÁY",
+                                value: chetChay,
+                                setVal: setChetChay,
+                            },
+                            {
+                                label: "ĐÔI THÔNG",
+                                value: doiThong,
+                                setVal: setDoiThong,
+                            },
                         ].map((item, idx) => (
                             <div key={idx} className="flex flex-col gap-2">
                                 <Label className="text-left text-[10px] font-bold tracking-wider text-gray-500 uppercase ml-1">
@@ -94,7 +183,10 @@ export default function CreateGameDrawer() {
                                 </Label>
                                 <Input
                                     type="text"
-                                    defaultValue={item.value}
+                                    value={item.value}
+                                    onChange={(e) =>
+                                        item.setVal(e.target.value)
+                                    }
                                     className="w-full h-auto rounded-xl bg-[#1c1c1e] border-white/5 py-3 px-4 text-left text-lg font-bold text-white focus-visible:ring-1 focus-visible:ring-gray-500 focus-visible:border-transparent"
                                 />
                             </div>
@@ -116,7 +208,7 @@ export default function CreateGameDrawer() {
                     </DrawerClose>
                     <DrawerClose asChild>
                         <Button
-                            onClick={() => navigate("/room")}
+                            onClick={handleCreateGame}
                             className="h-auto rounded-xl bg-gradient-to-r from-red-600 to-red-500 py-4 text-sm font-bold text-white shadow-[0_0_20px_rgba(239,68,68,0.3)] hover:from-red-500 hover:to-red-400 hover:text-white"
                         >
                             Tạo bàn
