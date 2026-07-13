@@ -98,7 +98,7 @@ export default function Home() {
                         </div>
                     </div>
                 </DrawerTrigger>
-                <DrawerContent className="bg-[#0a0a0a] border-white/5 outline-none overflow-hidden p-0 h-[95vh] data-[vaul-drawer-direction=bottom]:max-h-[95vh]">
+                <DrawerContent className="bg-[#0a0a0a] border-white/5 outline-none overflow-hidden p-0 max-h-[90vh]">
                     <CreateGameDrawer />
                 </DrawerContent>
             </Drawer>

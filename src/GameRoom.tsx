@@ -338,7 +338,7 @@ export default function GameRoom() {
                                     Thêm người chơi
                                 </Button>
                             </DrawerTrigger>
-                            <DrawerContent className="bg-[#0a0a0a] border-white/5 outline-none overflow-hidden p-0 h-[95vh] data-[vaul-drawer-direction=bottom]:max-h-[95vh]">
+                            <DrawerContent className="bg-[#0a0a0a] border-white/5 outline-none overflow-hidden p-0 max-h-[80vh]">
                                 <AddPlayerDrawer
                                     onConfirm={handleConfirmPlayers}
                                 />
@@ -462,7 +462,7 @@ export default function GameRoom() {
                                 GHI ĐIỂM
                             </Button>
                         </DrawerTrigger>
-                        <DrawerContent className="bg-[#0a0a0a] border-white/5 outline-none overflow-hidden p-0 h-[95vh] data-[vaul-drawer-direction=bottom]:max-h-[95vh]">
+                        <DrawerContent className="bg-[#0a0a0a] border-white/5 outline-none overflow-hidden p-0 max-h-[90vh]">
                             <ScoreDrawer
                                 key={
                                     editingRoundIndex === null
@@ -489,7 +489,7 @@ export default function GameRoom() {
             </div>
 
             <Drawer open={isReportOpen} onOpenChange={setIsReportOpen}>
-                <DrawerContent className="bg-[#0a0a0a] border-white/5 outline-none overflow-hidden p-0 h-[80vh] data-[vaul-drawer-direction=bottom]:max-h-[80vh]">
+                <DrawerContent className="bg-[#0a0a0a] border-white/5 outline-none overflow-hidden p-0 max-h-[80vh]">
                     <div className="flex flex-col h-full text-white font-sans">
                         {/* Header */}
                         <div className="flex items-center justify-between p-4 border-b border-white/5 shrink-0 bg-[#0f0f12]">
