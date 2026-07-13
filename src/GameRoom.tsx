@@ -462,7 +462,7 @@ export default function GameRoom() {
                                 GHI ĐIỂM
                             </Button>
                         </DrawerTrigger>
-                        <DrawerContent className="bg-[#0a0a0a] border-white/5 outline-none overflow-hidden p-0 max-h-[90vh]">
+                        <DrawerContent className="bg-[#0a0a0a] border-white/5 outline-none overflow-hidden p-0 data-[vaul-drawer-direction=bottom]:max-h-[90vh]">
                             <ScoreDrawer
                                 key={
                                     editingRoundIndex === null

@@ -160,7 +160,7 @@ export default function ScoreDrawer({
                     </div>
 
                     {/* Active Tab Panel */}
-                    <div className="bg-[#151517] rounded-3xl p-3.5 border border-white/[0.03] space-y-4">
+                    <div className="bg-[#151517] rounded-3xl p-5 border border-white/[0.03] space-y-4">
                         {activeTab === "ĂN PHẠT HEO" && (
                             <AnPhatHeoPanel
                                 players={players}
