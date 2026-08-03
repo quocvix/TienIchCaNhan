@@ -25,7 +25,6 @@ export default function CreateGameDrawer() {
     const [chetHeoDo, setChetHeoDo] = useState("4");
     const [chetHeoDen, setChetHeoDen] = useState("2");
     const [chetChay, setChetChay] = useState("4");
-    const [doiThong, setDoiThong] = useState("4");
 
     const handleCreateGame = () => {
         const id = crypto.randomUUID();
@@ -48,7 +47,6 @@ export default function CreateGameDrawer() {
                     chetHeoDo: parseInt(chetHeoDo) || 0,
                     chetHeoDen: parseInt(chetHeoDen) || 0,
                     chetChay: parseInt(chetChay) || 0,
-                    doiThong: parseInt(doiThong) || 0,
                 },
             },
         };
@@ -170,11 +168,6 @@ export default function CreateGameDrawer() {
                                 label: "CHẾT CHÁY",
                                 value: chetChay,
                                 setVal: setChetChay,
-                            },
-                            {
-                                label: "ĐÔI THÔNG",
-                                value: doiThong,
-                                setVal: setDoiThong,
                             },
                         ].map((item, idx) => (
                             <div key={idx} className="flex flex-col gap-2">

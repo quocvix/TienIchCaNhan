@@ -10,7 +10,7 @@ export function useScoreState({
     const [ranks, setRanks] = useState<Record<string, Rank | null>>(
         initialData?.ranks || {},
     );
-    const [activeTab, setActiveTab] = useState<string>("CHẶT / CHẶT ĐÈ");
+    const [activeTab, setActiveTab] = useState<string>("ĂN PHẠT HEO");
     const [anHeoSelection, setAnHeoSelection] = useState<
         Record<string, { do: number; den: number }>
     >(initialData?.anHeoSelection || {});
@@ -23,9 +23,6 @@ export function useScoreState({
     const [chetChaySelection, setChetChaySelection] = useState<
         Record<string, "an" | "chay" | "">
     >(initialData?.chetChaySelection || {});
-    const [doiThongSelection, setDoiThongSelection] = useState<
-        Record<string, { an: number; phat: number }>
-    >(initialData?.doiThongSelection || {});
     const [chatEvents, setChatEvents] = useState<ChatEvent[]>(
         initialData?.chatEvents || [],
     );
@@ -124,33 +121,6 @@ export function useScoreState({
         });
     };
 
-    const toggleDoiThong = (id: string, type: "an" | "phat") => {
-        const current = doiThongSelection[id] || { an: 0, phat: 0 };
-        const currentCount = current[type];
-
-        let nextCount = 0;
-        if (currentCount < 5) {
-            nextCount = currentCount + 1;
-        } else {
-            nextCount = 0;
-        }
-
-        setDoiThongSelection({
-            ...doiThongSelection,
-            [id]: {
-                ...current,
-                [type]: nextCount,
-            },
-        });
-    };
-
-    const clearDoiThong = (id: string) => {
-        setDoiThongSelection({
-            ...doiThongSelection,
-            [id]: { an: 0, phat: 0 },
-        });
-    };
-
     const clearAnHeo = (id: string) => {
         setAnHeoSelection({
             ...anHeoSelection,
@@ -202,7 +172,7 @@ export function useScoreState({
     };
 
     const hasActiveData = (tabName: string): boolean => {
-        if (tabName === "CHẶT / CHẶT ĐÈ") {
+        if (tabName === "CHẶT ĐÈ") {
             return chatEvents.some(
                 (ev) =>
                     ev.sequence.length >= 2 &&
@@ -227,11 +197,6 @@ export function useScoreState({
         if (tabName === "CHẾT CHÁY") {
             return Object.values(chetChaySelection).some(
                 (val) => val === "an" || val === "chay",
-            );
-        }
-        if (tabName === "ĐÔI THÔNG") {
-            return Object.values(doiThongSelection).some(
-                (val) => val && (val.an > 0 || val.phat > 0),
             );
         }
         return false;
@@ -313,15 +278,8 @@ export function useScoreState({
             score -= chetHeoValues.den * (chetHeo.den || 0);
         }
 
-        // Tính điểm Đôi Thông (Legacy)
-        const dtValue = getDoiThongPenalty();
-        const dt = doiThongSelection[id];
-        if (dt) {
-            score += dtValue * (dt.an || 0);
-            score -= dtValue * (dt.phat || 0);
-        }
-
         // Tính điểm Chặt / Chặt Đè (Cut Stacking)
+        const dtValue = getDoiThongPenalty();
         chatEvents.forEach((ev) => {
             const evScores = calculateEventScores(ev, heoValues, dtValue);
             score += evScores[id] || 0;
@@ -347,7 +305,6 @@ export function useScoreState({
             phatHeoSelection,
             chetHeoSelection,
             chetChaySelection,
-            doiThongSelection,
             chatEvents,
         });
     };
@@ -362,7 +319,6 @@ export function useScoreState({
         chetHeoSelection,
         chetChaySelection,
         setChetChaySelection,
-        doiThongSelection,
         chatEvents,
         addChatEvent,
         updateChatEvent,
@@ -374,8 +330,6 @@ export function useScoreState({
         burnedCount,
         handlePlayerClick,
         toggleHeo,
-        toggleDoiThong,
-        clearDoiThong,
         clearAnHeo,
         clearPhatHeo,
         clearChetHeo,

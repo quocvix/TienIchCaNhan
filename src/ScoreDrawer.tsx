@@ -31,8 +31,8 @@ import ChantDePanel from "./components/score-drawer/ChantDePanel";
 import AnPhatHeoPanel from "./components/score-drawer/AnPhatHeoPanel";
 import ChetHeoPanel from "./components/score-drawer/ChetHeoPanel";
 import ChetChayPanel from "./components/score-drawer/ChetChayPanel";
-import DoiThongPanel from "./components/score-drawer/DoiThongPanel";
 import ScoreSummary from "./components/score-drawer/ScoreSummary";
+import { useVisualViewport } from "./hooks/useVisualViewport";
 
 export type { ScoreDrawerProps };
 
@@ -43,6 +43,7 @@ export default function ScoreDrawer({
     roundNumber,
     onDelete,
 }: ScoreDrawerProps) {
+    const { bottomOffset } = useVisualViewport();
     const {
         ranks,
         setRanks,
@@ -53,7 +54,6 @@ export default function ScoreDrawer({
         chetHeoSelection,
         chetChaySelection,
         setChetChaySelection,
-        doiThongSelection,
         chatEvents,
         addChatEvent,
         updateChatEvent,
@@ -64,8 +64,6 @@ export default function ScoreDrawer({
         burnedCount,
         handlePlayerClick,
         toggleHeo,
-        toggleDoiThong,
-        clearDoiThong,
         clearAnHeo,
         clearPhatHeo,
         clearChetHeo,
@@ -139,11 +137,10 @@ export default function ScoreDrawer({
                     </h3>
                     <div className="flex flex-wrap gap-2">
                         {[
-                            "CHẶT / CHẶT ĐÈ",
+                            "ĂN PHẠT HEO",
+                            "CHẶT ĐÈ",
                             "CHẾT HEO",
                             "CHẾT CHÁY",
-                            "ĂN PHẠT HEO",
-                            "ĐÔI THÔNG",
                         ].map((item) => {
                             const isSelected = activeTab === item;
                             return (
@@ -167,7 +164,7 @@ export default function ScoreDrawer({
 
                     {/* Active Tab Panel */}
                     <div className="bg-[#151517] rounded-3xl p-5 border border-white/[0.03] space-y-4">
-                        {activeTab === "CHẶT / CHẶT ĐÈ" && (
+                        {activeTab === "CHẶT ĐÈ" && (
                             <ChantDePanel
                                 players={players}
                                 chatEvents={chatEvents}
@@ -210,16 +207,6 @@ export default function ScoreDrawer({
                                 getChetChayPenalty={getChetChayPenalty}
                             />
                         )}
-
-                        {activeTab === "ĐÔI THÔNG" && (
-                            <DoiThongPanel
-                                players={players}
-                                doiThongSelection={doiThongSelection}
-                                toggleDoiThong={toggleDoiThong}
-                                clearDoiThong={clearDoiThong}
-                                getDoiThongPenalty={getDoiThongPenalty}
-                            />
-                        )}
                     </div>
                 </div>
 
@@ -236,13 +223,14 @@ export default function ScoreDrawer({
                     phatHeoSelection={phatHeoSelection}
                     getChetHeoValues={getChetHeoValues}
                     chetHeoSelection={chetHeoSelection}
-                    getDoiThongPenalty={getDoiThongPenalty}
-                    doiThongSelection={doiThongSelection}
                 />
             </div>
 
             {/* Footer */}
-            <div className="p-4 border-t border-white/5 shrink-0 bg-[#0f0f12] flex flex-col gap-3">
+            <div
+                className="p-4 border-t border-white/5 shrink-0 bg-[#0f0f12] flex flex-col gap-3 transition-[padding] duration-150"
+                style={{ paddingBottom: `calc(1rem + ${bottomOffset}px)` }}
+            >
                 {!allRanked && (
                     <div className="flex items-center justify-center gap-2 p-3 bg-[#2a1b14] border border-orange-950/40 text-[#df8743] rounded-2xl text-xs font-bold">
                         <AlertTriangle size={14} />
@@ -312,4 +300,3 @@ export default function ScoreDrawer({
         </div>
     );
 }
-

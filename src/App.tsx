@@ -2,8 +2,11 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./Home.tsx";
 import GameRoom from "./GameRoom.tsx";
 import { ThemeProvider } from "./components/theme-provider.tsx";
+import { useVisualViewport } from "./hooks/useVisualViewport.ts";
 
 function App() {
+  useVisualViewport();
+
   return (
     <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
       <BrowserRouter>

@@ -21,7 +21,6 @@ export interface ScoreDrawerProps {
         phatHeoSelection?: Record<string, { do: number; den: number }>;
         chetHeoSelection?: Record<string, { do: number; den: number }>;
         chetChaySelection?: Record<string, "an" | "chay" | "">;
-        doiThongSelection?: Record<string, { an: number; phat: number }>;
         chatEvents?: ChatEvent[];
     };
     roundNumber?: number;

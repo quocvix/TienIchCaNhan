@@ -23,9 +23,11 @@ import {
 } from "@/components/ui/alert-dialog";
 
 import type { Player } from "@/types";
+import { useVisualViewport } from "./hooks/useVisualViewport";
 
 export default function GameRoom() {
     const navigate = useNavigate();
+    const { bottomOffset } = useVisualViewport();
 
     const query = new URLSearchParams(window.location.search);
     const gameId = query.get("id");
@@ -433,7 +435,10 @@ export default function GameRoom() {
             </div>
 
             {/* Bottom Action */}
-            <div className="p-4 bg-[#0a0a0a]/95 backdrop-blur-md border-t border-white/5 shrink-0 relative z-20">
+            <div 
+                className="p-4 bg-[#0a0a0a]/95 backdrop-blur-md border-t border-white/5 shrink-0 relative z-20 transition-[padding] duration-150"
+                style={{ paddingBottom: `calc(1rem + ${bottomOffset}px)` }}
+            >
                 {!hasPlayers ? (
                     <Button
                         className="w-full h-14 rounded-2xl bg-[#591c20] hover:bg-[#6e2227] text-gray-300 font-bold text-lg tracking-wider opacity-60 cursor-not-allowed"

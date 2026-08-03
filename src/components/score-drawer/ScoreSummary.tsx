@@ -12,8 +12,6 @@ interface ScoreSummaryProps {
     phatHeoSelection: Record<string, { do: number; den: number }>;
     getChetHeoValues: () => { do: number; den: number };
     chetHeoSelection: Record<string, { do: number; den: number }>;
-    getDoiThongPenalty: () => number;
-    doiThongSelection: Record<string, { an: number; phat: number }>;
 }
 
 export default function ScoreSummary({
@@ -28,8 +26,6 @@ export default function ScoreSummary({
     phatHeoSelection,
     getChetHeoValues,
     chetHeoSelection,
-    getDoiThongPenalty,
-    doiThongSelection,
 }: ScoreSummaryProps) {
     return (
         <div className="space-y-3">
@@ -159,41 +155,6 @@ export default function ScoreSummary({
                                                                 (-
                                                                 {chetHeoValues.den *
                                                                     chetHeo.den}
-                                                                )
-                                                            </span>
-                                                        )}
-                                                    </>
-                                                );
-                                            })()}
-                                            {(() => {
-                                                const dtValue =
-                                                    getDoiThongPenalty();
-                                                const dt =
-                                                    doiThongSelection[player.id];
-                                                if (!dt) return null;
-                                                return (
-                                                    <>
-                                                        {dt.an > 0 && (
-                                                            <span className="text-[9px] font-bold text-emerald-400/70 bg-emerald-500/10 px-1.5 py-0.5 rounded">
-                                                                ĐÔI THÔNG
-                                                                {dt.an > 1
-                                                                    ? ` x${dt.an}`
-                                                                    : ""}{" "}
-                                                                (+
-                                                                {dtValue *
-                                                                    dt.an}
-                                                                )
-                                                            </span>
-                                                        )}
-                                                        {dt.phat > 0 && (
-                                                            <span className="text-[9px] font-bold text-rose-400/70 bg-rose-500/10 px-1.5 py-0.5 rounded">
-                                                                PHẠT ĐÔI THÔNG
-                                                                {dt.phat > 1
-                                                                    ? ` x${dt.phat}`
-                                                                    : ""}{" "}
-                                                                (-
-                                                                {dtValue *
-                                                                    dt.phat}
                                                                 )
                                                             </span>
                                                         )}

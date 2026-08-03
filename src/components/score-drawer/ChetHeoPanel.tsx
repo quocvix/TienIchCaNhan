@@ -48,10 +48,10 @@ export default function ChetHeoPanel({
                                     onClick={() =>
                                         toggleHeo(player.id, "do", "chet")
                                     }
-                                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
+                                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
                                         selection.do > 0
                                             ? "bg-red-500/20 text-red-400 border-red-500/30"
-                                            : "bg-transparent text-gray-600 border-white/5 hover:border-white/10"
+                                            : "bg-transparent text-gray-500 border-white/5 hover:border-white/10"
                                     }`}
                                 >
                                     Đỏ
@@ -67,10 +67,10 @@ export default function ChetHeoPanel({
                                     onClick={() =>
                                         toggleHeo(player.id, "den", "chet")
                                     }
-                                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
+                                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
                                         selection.den > 0
                                             ? "bg-white/20 text-white border-white/30"
-                                            : "bg-transparent text-gray-600 border-white/5 hover:border-white/10"
+                                            : "bg-transparent text-gray-500 border-white/5 hover:border-white/10"
                                     }`}
                                 >
                                     Đen

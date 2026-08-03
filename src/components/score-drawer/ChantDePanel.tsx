@@ -9,19 +9,17 @@ interface ChantDePanelProps {
     onUpdateEvent: (event: ChatEvent) => void;
     onRemoveEvent: (id: string) => void;
     getHeoValues: () => { do: number; den: number };
-    getDoiThongPenalty: () => number;
+    getDoiThongPenalty?: () => number;
 }
 
 export function calculateEventScores(
     event: ChatEvent,
     heoValues: { do: number; den: number },
-    doiThongPenalty: number,
+    _doiThongPenalty: number = 0,
 ): Record<string, number> {
     const scores: Record<string, number> = {};
     const basePoints =
-        (event.heoDo || 0) * heoValues.do +
-        (event.heoDen || 0) * heoValues.den +
-        (event.doiThong || 0) * doiThongPenalty;
+        (event.heoDo || 0) * heoValues.do + (event.heoDen || 0) * heoValues.den;
 
     if (basePoints <= 0 || event.sequence.length < 2) {
         return scores;
@@ -36,8 +34,7 @@ export function calculateEventScores(
         if (p0) scores[p0] = (scores[p0] || 0) - basePoints;
         if (p1) scores[p1] = (scores[p1] || 0) + basePoints;
     } else {
-        // Chặt đè: P0 thoát phạt (0), các người bị chặt đè trước P(len-1) bị 0,
-        // Người bị chặt đè sau cùng P(len-2) bị phạt gấp đôi (basePoints * 2^(len-2)),
+        // Chặt đè: P0 thoát phạt (0), người bị chặt đè sau cùng P(len-2) bị phạt gấp đôi,
         // Người chặt đè sau cùng P(len-1) được ăn gấp đôi.
         const multiplier = Math.pow(2, len - 2);
         const finalPoints = basePoints * multiplier;
@@ -59,34 +56,31 @@ export default function ChantDePanel({
     onUpdateEvent,
     onRemoveEvent,
     getHeoValues,
-    getDoiThongPenalty,
 }: ChantDePanelProps) {
     const heoValues = getHeoValues();
-    const doiThongPenalty = getDoiThongPenalty();
 
     return (
         <div className="flex flex-col gap-4">
             <div className="flex items-center justify-between">
                 <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
-                    Lượt Chặt / Chặt Đè (Tiến Lên)
+                    Lượt Chặt Đè (Tiến Lên)
                 </span>
                 <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">
-                    Heo đỏ: {heoValues.do}đ • Heo đen: {heoValues.den}đ • Hàng:{" "}
-                    {doiThongPenalty}đ
+                    Heo đỏ: {heoValues.do}đ • Heo đen: {heoValues.den}đ
                 </span>
             </div>
 
             {chatEvents.length === 0 ? (
                 <div className="flex flex-col items-center justify-center p-6 border border-dashed border-white/10 rounded-2xl bg-white/[0.01] gap-3">
                     <p className="text-xs text-gray-400 font-medium text-center">
-                        Chưa có lượt chặt nào trong ván này.
+                        Chưa có lượt chặt đè nào trong ván này.
                     </p>
                     <Button
                         onClick={onAddEvent}
                         className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl h-9 px-4"
                     >
                         <Plus size={14} className="mr-1.5" />
-                        Thêm lượt chặt
+                        Thêm lượt chặt đè
                     </Button>
                 </div>
             ) : (
@@ -95,12 +89,9 @@ export default function ChantDePanel({
                         const eventScores = calculateEventScores(
                             event,
                             heoValues,
-                            doiThongPenalty,
                         );
 
-                        const toggleCard = (
-                            type: "heoDo" | "heoDen" | "doiThong",
-                        ) => {
+                        const toggleCard = (type: "heoDo" | "heoDen") => {
                             const current = event[type] || 0;
                             const next =
                                 current === 0 ? 1 : current === 1 ? 2 : 0;
@@ -118,7 +109,6 @@ export default function ChantDePanel({
 
                         const addSequenceStep = () => {
                             if (event.sequence.length < players.length) {
-                                // Find first unused player
                                 const unused = players.find(
                                     (p) => !event.sequence.includes(p.id),
                                 );
@@ -149,7 +139,7 @@ export default function ChantDePanel({
                                 {/* Header of Event */}
                                 <div className="flex items-center justify-between border-b border-white/5 pb-2">
                                     <span className="text-xs font-bold text-gray-300">
-                                        Lượt chặt #{eventIdx + 1}
+                                        Lượt chặt đè #{eventIdx + 1}
                                     </span>
                                     <button
                                         onClick={() => onRemoveEvent(event.id)}
@@ -162,55 +152,39 @@ export default function ChantDePanel({
                                 {/* Step 1: Select Cards */}
                                 <div className="flex flex-col gap-2">
                                     <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
-                                        1. Chọn bài/hàng bị chặt:
+                                        1. Chọn heo bị chặt:
                                     </span>
-                                    <div className="flex flex-wrap gap-2">
+                                    <div className="grid grid-cols-2 gap-2">
                                         <button
+                                            type="button"
                                             onClick={() => toggleCard("heoDo")}
-                                            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border relative ${
+                                            className={`py-3 px-4 rounded-2xl text-sm font-bold transition-all border flex items-center justify-center gap-2 active:scale-95 ${
                                                 event.heoDo > 0
-                                                    ? "bg-red-500/20 text-red-400 border-red-500/30"
-                                                    : "bg-transparent text-gray-500 border-white/5"
+                                                    ? "bg-red-500/20 text-red-400 border-red-500/40 shadow-sm"
+                                                    : "bg-[#121214] text-gray-400 border-white/5 hover:border-white/10 hover:text-white"
                                             }`}
                                         >
-                                            Heo Đỏ
+                                            <span>Heo Đỏ</span>
                                             {event.heoDo > 1 && (
-                                                <span className="ml-1 text-[10px]">
+                                                <span className="px-1.5 py-0.5 text-xs rounded-md bg-red-500/30 font-extrabold">
                                                     x{event.heoDo}
                                                 </span>
                                             )}
                                         </button>
 
                                         <button
+                                            type="button"
                                             onClick={() => toggleCard("heoDen")}
-                                            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border relative ${
+                                            className={`py-3 px-4 rounded-2xl text-sm font-bold transition-all border flex items-center justify-center gap-2 active:scale-95 ${
                                                 event.heoDen > 0
-                                                    ? "bg-white/20 text-white border-white/30"
-                                                    : "bg-transparent text-gray-500 border-white/5"
+                                                    ? "bg-white/20 text-white border-white/40 shadow-sm"
+                                                    : "bg-[#121214] text-gray-400 border-white/5 hover:border-white/10 hover:text-white"
                                             }`}
                                         >
-                                            Heo Đen
+                                            <span>Heo Đen</span>
                                             {event.heoDen > 1 && (
-                                                <span className="ml-1 text-[10px]">
+                                                <span className="px-1.5 py-0.5 text-xs rounded-md bg-white/30 font-extrabold text-white">
                                                     x{event.heoDen}
-                                                </span>
-                                            )}
-                                        </button>
-
-                                        <button
-                                            onClick={() =>
-                                                toggleCard("doiThong")
-                                            }
-                                            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border relative ${
-                                                event.doiThong > 0
-                                                    ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
-                                                    : "bg-transparent text-gray-500 border-white/5"
-                                            }`}
-                                        >
-                                            Đôi Thông / Hàng
-                                            {event.doiThong > 1 && (
-                                                <span className="ml-1 text-[10px]">
-                                                    x{event.doiThong}
                                                 </span>
                                             )}
                                         </button>
@@ -226,6 +200,7 @@ export default function ChantDePanel({
                                         {event.sequence.length <
                                             players.length && (
                                             <button
+                                                type="button"
                                                 onClick={addSequenceStep}
                                                 className="text-[10px] font-bold text-emerald-400 hover:text-emerald-300 uppercase tracking-wider"
                                             >
@@ -239,70 +214,78 @@ export default function ChantDePanel({
                                             (selectedId, sIdx) => {
                                                 const roleLabel =
                                                     sIdx === 0
-                                                        ? "Ra bài (Bị chặt)"
+                                                        ? "Ra heo (Bị chặt)"
                                                         : sIdx === 1
                                                           ? "Người Chặt"
-                                                          : `Chặt Đè ${sIdx > 2 ? `(${sIdx})` : "đôi thông"}`;
+                                                          : `Chặt Đè Lần ${sIdx - 1}`;
 
                                                 return (
                                                     <div
                                                         key={sIdx}
-                                                        className="flex items-center gap-2 bg-[#121214] p-2 rounded-xl border border-white/[0.04]"
+                                                        className="flex flex-col gap-2 bg-[#121214] p-3 rounded-2xl border border-white/[0.04]"
                                                     >
-                                                        <span className="text-[10px] font-bold text-gray-400 w-28 shrink-0">
-                                                            {sIdx + 1}.{" "}
-                                                            {roleLabel}:
-                                                        </span>
-
-                                                        <select
-                                                            value={selectedId}
-                                                            onChange={(e) =>
-                                                                setSequencePlayer(
-                                                                    sIdx,
-                                                                    e.target
-                                                                        .value,
-                                                                )
-                                                            }
-                                                            className="flex-1 bg-[#1c1c1e] border border-white/10 rounded-lg py-1 px-2 text-xs font-bold text-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                                                        >
-                                                            <option value="">
-                                                                -- Chọn người
-                                                                chơi --
-                                                            </option>
-                                                            {players.map(
-                                                                (p) => (
-                                                                    <option
-                                                                        key={
-                                                                            p.id
+                                                        <div className="flex items-center justify-between">
+                                                            <span className="text-[11px] font-bold text-gray-400">
+                                                                {sIdx + 1}.{" "}
+                                                                {roleLabel}:
+                                                            </span>
+                                                            {sIdx >= 2 &&
+                                                                sIdx ===
+                                                                    event
+                                                                        .sequence
+                                                                        .length -
+                                                                        1 && (
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={
+                                                                            removeLastSequenceStep
                                                                         }
-                                                                        value={
-                                                                            p.id
-                                                                        }
+                                                                        className="text-gray-500 hover:text-red-400 text-[10px] font-bold flex items-center gap-1"
                                                                     >
-                                                                        {p.name}
-                                                                    </option>
-                                                                ),
-                                                            )}
-                                                        </select>
+                                                                        <Trash2
+                                                                            size={
+                                                                                12
+                                                                            }
+                                                                        />
+                                                                        Xóa lượt
+                                                                        này
+                                                                    </button>
+                                                                )}
+                                                        </div>
 
-                                                        {sIdx >= 2 &&
-                                                            sIdx ===
-                                                                event.sequence
-                                                                    .length -
-                                                                    1 && (
-                                                                <button
-                                                                    onClick={
-                                                                        removeLastSequenceStep
-                                                                    }
-                                                                    className="text-gray-500 hover:text-red-400 p-1"
-                                                                >
-                                                                    <Trash2
-                                                                        size={
-                                                                            14
-                                                                        }
-                                                                    />
-                                                                </button>
+                                                        {/* Clickable Player Chips */}
+                                                        <div className="grid grid-cols-2 gap-2 pt-1">
+                                                            {players.map(
+                                                                (p) => {
+                                                                    const isSelected =
+                                                                        selectedId ===
+                                                                        p.id;
+                                                                    return (
+                                                                        <button
+                                                                            key={
+                                                                                p.id
+                                                                            }
+                                                                            type="button"
+                                                                            onClick={() =>
+                                                                                setSequencePlayer(
+                                                                                    sIdx,
+                                                                                    p.id,
+                                                                                )
+                                                                            }
+                                                                            className={`py-3 px-3 rounded-2xl text-sm font-bold transition-all border text-center truncate active:scale-95 ${
+                                                                                isSelected
+                                                                                    ? "bg-emerald-600 text-white border-emerald-500 shadow-md ring-2 ring-emerald-500/30"
+                                                                                    : "bg-[#1c1c1e] text-gray-300 border-white/10 hover:border-white/20 hover:text-white"
+                                                                            }`}
+                                                                        >
+                                                                            {
+                                                                                p.name
+                                                                            }
+                                                                        </button>
+                                                                    );
+                                                                },
                                                             )}
+                                                        </div>
                                                     </div>
                                                 );
                                             },
@@ -355,7 +338,7 @@ export default function ChantDePanel({
                         className="w-full border-dashed border-white/10 hover:border-white/20 bg-transparent text-gray-300 text-xs font-bold rounded-xl h-10"
                     >
                         <Plus size={14} className="mr-1.5" />
-                        Thêm lượt chặt khác
+                        Thêm lượt chặt đè khác
                     </Button>
                 </div>
             )}
