@@ -1,15 +1,15 @@
 import { X } from "lucide-react";
-import type { Rank } from "./types";
+import type { Player, Rank } from "./types";
 
 interface ChetChayPanelProps {
-    players: string[];
+    players: Player[];
     chetChaySelection: Record<string, "an" | "chay" | "">;
     ranks: Record<string, Rank | null>;
     setRanks: React.Dispatch<React.SetStateAction<Record<string, Rank | null>>>;
     setChetChaySelection: React.Dispatch<
         React.SetStateAction<Record<string, "an" | "chay" | "">>
     >;
-    clearChetChay: (name: string) => void;
+    clearChetChay: (id: string) => void;
     getChetChayPenalty: () => number;
 }
 
@@ -32,8 +32,8 @@ export default function ChetChayPanel({
                     Hệ số: {getChetChayPenalty()} điểm
                 </span>
             </div>
-            {players.map((name) => {
-                const status = chetChaySelection[name] || "";
+            {players.map((player) => {
+                const status = chetChaySelection[player.id] || "";
                 const isAn = status === "an";
                 const isChay = status === "chay";
 
@@ -44,7 +44,7 @@ export default function ChetChayPanel({
 
                     if (type === "an") {
                         if (isAn) {
-                            newSelection[name] = "";
+                            newSelection[player.id] = "";
                         } else {
                             // Xóa người ăn cũ (chỉ 1 người được ăn)
                             Object.keys(newSelection).forEach((key) => {
@@ -52,19 +52,19 @@ export default function ChetChayPanel({
                                     newSelection[key] = "";
                                 }
                             });
-                            newSelection[name] = "an";
+                            newSelection[player.id] = "an";
                         }
                     } else {
                         if (isChay) {
-                            newSelection[name] = "";
+                            newSelection[player.id] = "";
                         } else {
-                            newSelection[name] = "chay";
+                            newSelection[player.id] = "chay";
                             // Nếu bị cháy -> xóa rank đã chọn
-                            if (ranks[name]) {
+                            if (ranks[player.id]) {
                                 const newRanks = {
                                     ...ranks,
                                 };
-                                delete newRanks[name];
+                                delete newRanks[player.id];
                                 setRanks(newRanks);
                             }
                         }
@@ -75,7 +75,7 @@ export default function ChetChayPanel({
 
                 return (
                     <div
-                        key={name}
+                        key={player.id}
                         className="flex justify-between items-center py-2"
                     >
                         <span
@@ -87,7 +87,7 @@ export default function ChetChayPanel({
                                       : "text-gray-300"
                             }`}
                         >
-                            {name}
+                            {player.name}
                         </span>
                         <div className="flex items-center gap-2">
                             <button
@@ -112,7 +112,7 @@ export default function ChetChayPanel({
                             </button>
                             {/* Clear Button */}
                             <button
-                                onClick={() => clearChetChay(name)}
+                                onClick={() => clearChetChay(player.id)}
                                 className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all text-gray-600 hover:text-red-400 bg-transparent ${
                                     status !== ""
                                         ? "opacity-100 cursor-pointer"

@@ -1,7 +1,18 @@
+import type { Player } from "@/types";
+
+export type { Player };
 export type Rank = "NHẤT" | "NHÌ" | "BA" | "BÉT";
 
+export interface ChatEvent {
+    id: string;
+    heoDo: number;
+    heoDen: number;
+    doiThong: number;
+    sequence: string[]; // [pInitial, pCutter1, pCutter2, ...]
+}
+
 export interface ScoreDrawerProps {
-    players: string[];
+    players: Player[];
     onConfirm: (scores: Record<string, number>, details?: any) => void;
     onDelete?: () => void;
     initialData?: {
@@ -11,6 +22,7 @@ export interface ScoreDrawerProps {
         chetHeoSelection?: Record<string, { do: number; den: number }>;
         chetChaySelection?: Record<string, "an" | "chay" | "">;
         doiThongSelection?: Record<string, { an: number; phat: number }>;
+        chatEvents?: ChatEvent[];
     };
     roundNumber?: number;
 }

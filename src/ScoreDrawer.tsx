@@ -27,6 +27,7 @@ import {
 import type { ScoreDrawerProps } from "./components/score-drawer/types";
 import { useScoreState } from "./components/score-drawer/useScoreState";
 import RankSelection from "./components/score-drawer/RankSelection";
+import ChantDePanel from "./components/score-drawer/ChantDePanel";
 import AnPhatHeoPanel from "./components/score-drawer/AnPhatHeoPanel";
 import ChetHeoPanel from "./components/score-drawer/ChetHeoPanel";
 import ChetChayPanel from "./components/score-drawer/ChetChayPanel";
@@ -53,6 +54,10 @@ export default function ScoreDrawer({
         chetChaySelection,
         setChetChaySelection,
         doiThongSelection,
+        chatEvents,
+        addChatEvent,
+        updateChatEvent,
+        removeChatEvent,
         getChetChayPenalty,
         isPlayerBurned,
         isPlayerEater,
@@ -134,9 +139,10 @@ export default function ScoreDrawer({
                     </h3>
                     <div className="flex flex-wrap gap-2">
                         {[
+                            "CHẶT / CHẶT ĐÈ",
+                            "CHẾT HEO",
                             "CHẾT CHÁY",
                             "ĂN PHẠT HEO",
-                            "CHẾT HEO",
                             "ĐÔI THÔNG",
                         ].map((item) => {
                             const isSelected = activeTab === item;
@@ -161,6 +167,18 @@ export default function ScoreDrawer({
 
                     {/* Active Tab Panel */}
                     <div className="bg-[#151517] rounded-3xl p-5 border border-white/[0.03] space-y-4">
+                        {activeTab === "CHẶT / CHẶT ĐÈ" && (
+                            <ChantDePanel
+                                players={players}
+                                chatEvents={chatEvents}
+                                onAddEvent={addChatEvent}
+                                onUpdateEvent={updateChatEvent}
+                                onRemoveEvent={removeChatEvent}
+                                getHeoValues={getHeoValues}
+                                getDoiThongPenalty={getDoiThongPenalty}
+                            />
+                        )}
+
                         {activeTab === "ĂN PHẠT HEO" && (
                             <AnPhatHeoPanel
                                 players={players}

@@ -1,10 +1,10 @@
-import type { Rank } from "./types";
+import type { Player, Rank } from "./types";
 
 interface RankSelectionProps {
-    players: string[];
+    players: Player[];
     ranks: Record<string, Rank | null>;
-    isPlayerBurned: (name: string) => boolean;
-    handlePlayerClick: (name: string) => void;
+    isPlayerBurned: (id: string) => boolean;
+    handlePlayerClick: (id: string) => void;
 }
 
 const rankStyles: Record<Rank, { bg: string; text: string; label: string }> = {
@@ -26,15 +26,15 @@ export default function RankSelection({
                 Thứ tự về đích
             </h3>
             <div className="grid grid-cols-4 gap-3">
-                {players.map((name) => {
-                    const burned = isPlayerBurned(name);
-                    const rank = ranks[name];
+                {players.map((player) => {
+                    const burned = isPlayerBurned(player.id);
+                    const rank = ranks[player.id];
                     const style = rank ? rankStyles[rank] : null;
 
                     return (
                         <button
-                            key={name}
-                            onClick={() => handlePlayerClick(name)}
+                            key={player.id}
+                            onClick={() => handlePlayerClick(player.id)}
                             disabled={burned}
                             className={`h-20 rounded-2xl flex flex-col items-center justify-center gap-1 transition-all ${
                                 burned
@@ -45,7 +45,7 @@ export default function RankSelection({
                             }`}
                         >
                             <span className="text-sm font-bold truncate max-w-[90%]">
-                                {name}
+                                {player.name}
                             </span>
                             {burned ? (
                                 <span className="text-[9px] font-black uppercase tracking-wider text-red-400/80">

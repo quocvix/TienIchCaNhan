@@ -1,14 +1,15 @@
 import { X } from "lucide-react";
+import type { Player } from "./types";
 
 interface ChetHeoPanelProps {
-    players: string[];
+    players: Player[];
     chetHeoSelection: Record<string, { do: number; den: number }>;
     toggleHeo: (
-        name: string,
+        id: string,
         color: "do" | "den",
         type: "an" | "phat" | "chet",
     ) => void;
-    clearChetHeo: (name: string) => void;
+    clearChetHeo: (id: string) => void;
 }
 
 export default function ChetHeoPanel({
@@ -28,20 +29,20 @@ export default function ChetHeoPanel({
                     Thối Heo (Trừ điểm)
                 </span>
             </div>
-            {players.map((name) => {
-                const selection = chetHeoSelection[name] || { do: 0, den: 0 };
+            {players.map((player) => {
+                const selection = chetHeoSelection[player.id] || { do: 0, den: 0 };
                 return (
                     <div
-                        key={name}
+                        key={player.id}
                         className="flex justify-between items-center py-2.5 border-t border-white/[0.04]"
                     >
                         <span className="text-sm font-bold text-gray-300">
-                            {name}
+                            {player.name}
                         </span>
                         <div className="flex items-center gap-2">
                             <div className="relative">
                                 <button
-                                    onClick={() => toggleHeo(name, "do", "chet")}
+                                    onClick={() => toggleHeo(player.id, "do", "chet")}
                                     className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
                                         selection.do > 0
                                             ? "bg-red-500/20 text-red-400 border-red-500/30"
@@ -58,7 +59,7 @@ export default function ChetHeoPanel({
                             </div>
                             <div className="relative">
                                 <button
-                                    onClick={() => toggleHeo(name, "den", "chet")}
+                                    onClick={() => toggleHeo(player.id, "den", "chet")}
                                     className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
                                         selection.den > 0
                                             ? "bg-white/20 text-white border-white/30"
@@ -75,7 +76,7 @@ export default function ChetHeoPanel({
                             </div>
                             {/* Clear Button */}
                             <button
-                                onClick={() => clearChetHeo(name)}
+                                onClick={() => clearChetHeo(player.id)}
                                 className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all text-gray-600 hover:text-red-400 bg-transparent ${
                                     selection.do > 0 || selection.den > 0
                                         ? "opacity-100 cursor-pointer"

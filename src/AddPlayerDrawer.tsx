@@ -10,22 +10,38 @@ import {
     DrawerHeader,
     DrawerTitle,
 } from "@/components/ui/drawer";
+import type { Player } from "@/types";
 
 interface AddPlayerDrawerProps {
-    initialPlayers?: string[];
-    onConfirm: (players: string[]) => void;
+    initialPlayers?: Player[];
+    onConfirm: (players: Player[]) => void;
 }
 
 export default function AddPlayerDrawer({ 
-    initialPlayers = ["", "", "", ""], 
+    initialPlayers = [], 
     onConfirm 
 }: AddPlayerDrawerProps) {
-    const [players, setPlayers] = useState([...initialPlayers]);
+    const [playerInputs, setPlayerInputs] = useState<{ id: string; name: string }[]>(() =>
+        [0, 1, 2, 3].map((idx) => ({
+            id: initialPlayers[idx]?.id || "",
+            name: initialPlayers[idx]?.name || "",
+        }))
+    );
 
     const handleNameChange = (index: number, value: string) => {
-        const newPlayers = [...players];
-        newPlayers[index] = value;
-        setPlayers(newPlayers);
+        const updated = [...playerInputs];
+        updated[index] = { ...updated[index], name: value };
+        setPlayerInputs(updated);
+    };
+
+    const handleConfirm = () => {
+        const confirmed: Player[] = playerInputs
+            .filter((p) => p.name.trim() !== "")
+            .map((p) => ({
+                id: p.id || crypto.randomUUID(),
+                name: p.name.trim(),
+            }));
+        onConfirm(confirmed);
     };
 
     return (
@@ -62,7 +78,7 @@ export default function AddPlayerDrawer({
                             <Input
                                 type="text"
                                 placeholder={`Tên người chơi ${idx + 1}`}
-                                value={players[idx]}
+                                value={playerInputs[idx].name}
                                 onChange={(e) => handleNameChange(idx, e.target.value)}
                                 className="w-full h-auto rounded-xl bg-[#1c1c1e] border-white/5 py-3 px-4 text-left text-lg font-bold text-white focus-visible:ring-1 focus-visible:ring-red-500 focus-visible:border-transparent placeholder:text-gray-600"
                             />
@@ -75,7 +91,7 @@ export default function AddPlayerDrawer({
             <DrawerFooter className="p-4 border-t border-white/5 shrink-0 bg-[#0a0a0a]">
                 <DrawerClose asChild>
                     <Button 
-                        onClick={() => onConfirm(players)}
+                        onClick={handleConfirm}
                         className="w-full h-auto rounded-xl bg-gradient-to-r from-red-600 to-red-500 py-4 text-sm font-bold text-white shadow-[0_0_20px_rgba(239,68,68,0.3)] hover:from-red-500 hover:to-red-400 hover:text-white"
                     >
                         Xác nhận

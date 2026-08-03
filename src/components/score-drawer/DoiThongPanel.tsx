@@ -1,10 +1,11 @@
 import { X } from "lucide-react";
+import type { Player } from "./types";
 
 interface DoiThongPanelProps {
-    players: string[];
+    players: Player[];
     doiThongSelection: Record<string, { an: number; phat: number }>;
-    toggleDoiThong: (name: string, type: "an" | "phat") => void;
-    clearDoiThong: (name: string) => void;
+    toggleDoiThong: (id: string, type: "an" | "phat") => void;
+    clearDoiThong: (id: string) => void;
     getDoiThongPenalty: () => number;
 }
 
@@ -26,23 +27,23 @@ export default function DoiThongPanel({
                     Ăn/Phạt (Hệ số: {getDoiThongPenalty()})
                 </span>
             </div>
-            {players.map((name) => {
-                const selection = doiThongSelection[name] || { an: 0, phat: 0 };
+            {players.map((player) => {
+                const selection = doiThongSelection[player.id] || { an: 0, phat: 0 };
                 const hasData = selection.an > 0 || selection.phat > 0;
 
                 return (
                     <div
-                        key={name}
+                        key={player.id}
                         className="flex justify-between items-center py-2.5 border-t border-white/[0.04]"
                     >
                         <span className="text-sm font-bold text-gray-300">
-                            {name}
+                            {player.name}
                         </span>
                         <div className="flex items-center gap-2">
                             {/* Button Ăn */}
                             <div className="relative">
                                 <button
-                                    onClick={() => toggleDoiThong(name, "an")}
+                                    onClick={() => toggleDoiThong(player.id, "an")}
                                     className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all border ${
                                         selection.an > 0
                                             ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
@@ -60,7 +61,7 @@ export default function DoiThongPanel({
                             {/* Button Phạt */}
                             <div className="relative">
                                 <button
-                                    onClick={() => toggleDoiThong(name, "phat")}
+                                    onClick={() => toggleDoiThong(player.id, "phat")}
                                     className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all border ${
                                         selection.phat > 0
                                             ? "bg-red-500/20 text-red-400 border-red-500/30"
@@ -77,7 +78,7 @@ export default function DoiThongPanel({
                             </div>
                             {/* Clear Button */}
                             <button
-                                onClick={() => clearDoiThong(name)}
+                                onClick={() => clearDoiThong(player.id)}
                                 className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all text-gray-600 hover:text-red-400 bg-transparent ${
                                     hasData
                                         ? "opacity-100 cursor-pointer"

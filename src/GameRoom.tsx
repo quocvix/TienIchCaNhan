@@ -22,19 +22,25 @@ import {
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
+import type { Player } from "@/types";
+
 export default function GameRoom() {
     const navigate = useNavigate();
 
     const query = new URLSearchParams(window.location.search);
     const gameId = query.get("id");
 
-    const [players, setPlayers] = useState<string[]>(() => {
+    const [players, setPlayers] = useState<Player[]>(() => {
         if (!gameId) return [];
         const stored = localStorage.getItem("game_history");
         if (stored) {
             const games = JSON.parse(stored);
             const found = games.find((g: any) => g.id === gameId);
-            if (found) return found.players;
+            if (found && found.players) {
+                return found.players.map((p: any) =>
+                    typeof p === "string" ? { id: p, name: p } : p
+                );
+            }
         }
         return [];
     });
@@ -85,8 +91,8 @@ export default function GameRoom() {
     const hasPlayers = players.length > 0;
     const roundCount = history.length;
 
-    const handleConfirmPlayers = (newPlayers: string[]) => {
-        const activePlayers = newPlayers.filter((p) => p.trim() !== "");
+    const handleConfirmPlayers = (newPlayers: Player[]) => {
+        const activePlayers = newPlayers.filter((p) => p.name.trim() !== "");
         setPlayers(activePlayers);
         setHistory([]);
 
@@ -195,15 +201,15 @@ export default function GameRoom() {
         }
     };
 
-    const getPlayerTotal = (name: string) => {
+    const getPlayerTotal = (playerId: string) => {
         return history.reduce((sum, round) => {
             const roundScores = round.scores || round;
-            return sum + (roundScores[name] || 0);
+            return sum + (roundScores[playerId] ?? 0);
         }, 0);
     };
 
     return (
-        <div className="min-h-screen w-full relative bg-black text-white font-sans sm:hidden flex flex-col overflow-x-hidden">
+        <div className="h-[100dvh] h-screen max-h-screen w-full relative bg-black text-white font-sans sm:hidden flex flex-col overflow-hidden">
             {/* Blue Spotlight Background */}
             <div
                 className="absolute inset-0 z-0 pointer-events-none"
@@ -219,7 +225,7 @@ export default function GameRoom() {
                 }}
             />
             {/* Header */}
-            <div className="flex items-center justify-between p-4 bg-[#0f0f12]/60 backdrop-blur-md relative z-10 border-b border-white/5">
+            <div className="flex items-center justify-between p-4 bg-[#0f0f12]/60 backdrop-blur-md relative z-10 border-b border-white/5 shrink-0">
                 <Button
                     onClick={() => navigate(-1)}
                     variant="ghost"
@@ -314,10 +320,10 @@ export default function GameRoom() {
             </div>
 
             {/* Content area */}
-            <div className="flex-1 overflow-y-auto relative z-10">
+            <div className="flex-1 min-h-0 overflow-y-auto relative z-10">
                 {!hasPlayers ? (
                     // Empty State
-                    <div className="border border-dashed border-white/10 rounded-[2rem] p-8 flex flex-col items-center justify-center gap-6 bg-gradient-to-b from-white/[0.02] to-transparent mt-4">
+                    <div className="border border-dashed border-white/10 rounded-[2rem] p-8 flex flex-col items-center justify-center gap-6 bg-gradient-to-b from-white/[0.02] to-transparent mt-4 mx-4">
                         <div className="flex flex-col items-center gap-2 text-center">
                             <h2 className="text-lg font-bold text-white">
                                 Chưa có người chơi nào.
@@ -348,29 +354,22 @@ export default function GameRoom() {
                 ) : (
                     // Active Game State
                     <div className="flex flex-col">
-                        {/* Player Totals */}
-                        <div className="p-3 border-b border-white/5">
+                        {/* Player Totals Header */}
+                        <div className="p-3 border-b border-white/5 bg-[#0a0a0a]/90 backdrop-blur-md sticky top-0 z-20">
                             <div className="flex items-center">
                                 <div className="w-8 shrink-0" />
                                 <div
-                                    className={`flex-1  grid gap-3 ${players.length === 2 ? "grid-cols-2" : players.length === 3 ? "grid-cols-3" : "grid-cols-4"}`}
+                                    className={`flex-1 grid gap-3 ${players.length === 2 ? "grid-cols-2" : players.length === 3 ? "grid-cols-3" : "grid-cols-4"}`}
                                 >
-                                    {players.map((name, idx) => {
+                                    {players.map((player) => {
                                         return (
                                             <div
-                                                key={idx}
-                                                className="bg-[#151517] border rounded-xl flex flex-col items-center justify-center py-3 gap-2 shadow-sm"
+                                                key={player.id}
+                                                className="bg-[#151517] border border-white/10 rounded-xl flex flex-col items-center justify-center py-3 gap-2 shadow-sm"
                                             >
                                                 <span className="text-[16px] font-bold text-gray-200 uppercase tracking-widest truncate max-w-full px-1">
-                                                    {name}
+                                                    {player.name}
                                                 </span>
-                                                {/* <span
-                                                    className={`text-[16px] font-black ${total > 0 ? "text-emerald-500" : total < 0 ? "text-[#ff3333]" : "text-gray-400"}`}
-                                                >
-                                                    {total > 0
-                                                        ? `+${total}`
-                                                        : total}
-                                                </span> */}
                                             </div>
                                         );
                                     })}
@@ -403,14 +402,16 @@ export default function GameRoom() {
                                         <div
                                             className={`flex-1 grid gap-2 ${players.length === 2 ? "grid-cols-2" : players.length === 3 ? "grid-cols-3" : "grid-cols-4"}`}
                                         >
-                                            {players.map((name, sIdx) => {
+                                            {players.map((player) => {
                                                 const roundScores =
                                                     round.scores || round;
                                                 const score =
-                                                    roundScores[name] || 0;
+                                                    roundScores[player.id] ??
+                                                    roundScores[player.name] ??
+                                                    0;
                                                 return (
                                                     <div
-                                                        key={sIdx}
+                                                        key={player.id}
                                                         className="flex justify-center"
                                                     >
                                                         <span
@@ -432,7 +433,7 @@ export default function GameRoom() {
             </div>
 
             {/* Bottom Action */}
-            <div className="p-4 bg-[#0a0a0a]/60 backdrop-blur-md border-t border-white/5 shrink-0 mt-auto relative z-10">
+            <div className="p-4 bg-[#0a0a0a]/95 backdrop-blur-md border-t border-white/5 shrink-0 relative z-20">
                 {!hasPlayers ? (
                     <Button
                         className="w-full h-14 rounded-2xl bg-[#591c20] hover:bg-[#6e2227] text-gray-300 font-bold text-lg tracking-wider opacity-60 cursor-not-allowed"
@@ -490,7 +491,7 @@ export default function GameRoom() {
 
             <Drawer open={isReportOpen} onOpenChange={setIsReportOpen}>
                 <DrawerContent className="bg-[#0a0a0a] border-white/5 outline-none overflow-hidden p-0 max-h-[80vh]">
-                    <div className="flex flex-col h-full text-white font-sans">
+                    <div className="flex flex-col h-full text-[#white] font-sans">
                         {/* Header */}
                         <div className="flex items-center justify-between p-4 border-b border-white/5 shrink-0 bg-[#0f0f12]">
                             <div className="flex items-center gap-3">
@@ -522,20 +523,20 @@ export default function GameRoom() {
                             {/* Player Rankings List */}
                             <div className="space-y-3">
                                 {players
-                                    .map((name) => {
-                                        const total = getPlayerTotal(name);
-                                        return { name, total };
+                                    .map((player) => {
+                                        const total = getPlayerTotal(player.id);
+                                        return { player, total };
                                     })
                                     .sort((a, b) => b.total - a.total)
-                                    .map((player, idx) => {
+                                    .map(({ player, total }, idx) => {
                                         const isWinner =
-                                            idx === 0 && player.total > 0;
+                                            idx === 0 && total > 0;
                                         const isLoser =
                                             idx === players.length - 1 &&
-                                            player.total < 0;
+                                            total < 0;
                                         return (
                                             <div
-                                                key={idx}
+                                                key={player.id}
                                                 className="bg-[#151517] border border-white/5 rounded-2xl p-4 flex items-center justify-between"
                                             >
                                                 <div className="flex items-center gap-3">
@@ -565,16 +566,16 @@ export default function GameRoom() {
                                                 </div>
                                                 <span
                                                     className={`text-lg font-black ${
-                                                        player.total > 0
+                                                        total > 0
                                                             ? "text-emerald-500"
-                                                            : player.total < 0
+                                                            : total < 0
                                                               ? "text-rose-500"
                                                               : "text-gray-400"
                                                     }`}
                                                 >
-                                                    {player.total > 0
-                                                        ? `${player.total}`
-                                                        : player.total}
+                                                    {total > 0
+                                                        ? `${total}`
+                                                        : total}
                                                 </span>
                                             </div>
                                         );

@@ -1,5 +1,6 @@
 import { useState } from "react";
-import type { Rank, ScoreDrawerProps } from "./types";
+import type { Rank, ScoreDrawerProps, ChatEvent } from "./types";
+import { calculateEventScores } from "./ChantDePanel";
 
 export function useScoreState({
     players,
@@ -9,7 +10,7 @@ export function useScoreState({
     const [ranks, setRanks] = useState<Record<string, Rank | null>>(
         initialData?.ranks || {},
     );
-    const [activeTab, setActiveTab] = useState<string>("ĂN PHẠT HEO");
+    const [activeTab, setActiveTab] = useState<string>("CHẶT / CHẶT ĐÈ");
     const [anHeoSelection, setAnHeoSelection] = useState<
         Record<string, { do: number; den: number }>
     >(initialData?.anHeoSelection || {});
@@ -25,6 +26,9 @@ export function useScoreState({
     const [doiThongSelection, setDoiThongSelection] = useState<
         Record<string, { an: number; phat: number }>
     >(initialData?.doiThongSelection || {});
+    const [chatEvents, setChatEvents] = useState<ChatEvent[]>(
+        initialData?.chatEvents || [],
+    );
 
     const getGameSettings = () => {
         const query = new URLSearchParams(window.location.search);
@@ -45,26 +49,26 @@ export function useScoreState({
         return settings?.penalties?.chetChay ?? 4;
     };
 
-    const isPlayerBurned = (name: string): boolean => {
-        return chetChaySelection[name] === "chay";
+    const isPlayerBurned = (id: string): boolean => {
+        return chetChaySelection[id] === "chay";
     };
 
-    const isPlayerEater = (name: string): boolean => {
-        return chetChaySelection[name] === "an";
+    const isPlayerEater = (id: string): boolean => {
+        return chetChaySelection[id] === "an";
     };
 
-    const burnedCount = players.filter((p) => isPlayerBurned(p)).length;
+    const burnedCount = players.filter((p) => isPlayerBurned(p.id)).length;
 
-    const handlePlayerClick = (name: string) => {
+    const handlePlayerClick = (id: string) => {
         // Người bị chết cháy không được tick thứ tự về đích
-        if (isPlayerBurned(name)) return;
+        if (isPlayerBurned(id)) return;
 
         const rankOrder: Rank[] = ["NHẤT", "NHÌ", "BA", "BÉT"];
 
-        if (ranks[name]) {
+        if (ranks[id]) {
             // Remove rank
             const newRanks = { ...ranks };
-            delete newRanks[name];
+            delete newRanks[id];
             setRanks(newRanks);
         } else {
             // Find next available rank
@@ -75,14 +79,14 @@ export function useScoreState({
             if (nextRank) {
                 setRanks({
                     ...ranks,
-                    [name]: nextRank,
+                    [id]: nextRank,
                 });
             }
         }
     };
 
     const toggleHeo = (
-        name: string,
+        id: string,
         color: "do" | "den",
         type: "an" | "phat" | "chet",
     ) => {
@@ -99,7 +103,7 @@ export function useScoreState({
                   ? setPhatHeoSelection
                   : setChetHeoSelection;
 
-        const current = selection[name] || { do: 0, den: 0 };
+        const current = selection[id] || { do: 0, den: 0 };
         const currentCount = current[color];
 
         let nextCount = 0;
@@ -113,15 +117,15 @@ export function useScoreState({
 
         setSelection({
             ...selection,
-            [name]: {
+            [id]: {
                 ...current,
                 [color]: nextCount,
             },
         });
     };
 
-    const toggleDoiThong = (name: string, type: "an" | "phat") => {
-        const current = doiThongSelection[name] || { an: 0, phat: 0 };
+    const toggleDoiThong = (id: string, type: "an" | "phat") => {
+        const current = doiThongSelection[id] || { an: 0, phat: 0 };
         const currentCount = current[type];
 
         let nextCount = 0;
@@ -133,49 +137,78 @@ export function useScoreState({
 
         setDoiThongSelection({
             ...doiThongSelection,
-            [name]: {
+            [id]: {
                 ...current,
                 [type]: nextCount,
             },
         });
     };
 
-    const clearDoiThong = (name: string) => {
+    const clearDoiThong = (id: string) => {
         setDoiThongSelection({
             ...doiThongSelection,
-            [name]: { an: 0, phat: 0 },
+            [id]: { an: 0, phat: 0 },
         });
     };
 
-    const clearAnHeo = (name: string) => {
+    const clearAnHeo = (id: string) => {
         setAnHeoSelection({
             ...anHeoSelection,
-            [name]: { do: 0, den: 0 },
+            [id]: { do: 0, den: 0 },
         });
     };
 
-    const clearPhatHeo = (name: string) => {
+    const clearPhatHeo = (id: string) => {
         setPhatHeoSelection({
             ...phatHeoSelection,
-            [name]: { do: 0, den: 0 },
+            [id]: { do: 0, den: 0 },
         });
     };
 
-    const clearChetHeo = (name: string) => {
+    const clearChetHeo = (id: string) => {
         setChetHeoSelection({
             ...chetHeoSelection,
-            [name]: { do: 0, den: 0 },
+            [id]: { do: 0, den: 0 },
         });
     };
 
-    const clearChetChay = (name: string) => {
+    const clearChetChay = (id: string) => {
         setChetChaySelection({
             ...chetChaySelection,
-            [name]: "",
+            [id]: "",
         });
+    };
+
+    const addChatEvent = () => {
+        const defaultSeq = players.length >= 2 ? [players[0].id, players[1].id] : [];
+        setChatEvents([
+            ...chatEvents,
+            {
+                id: crypto.randomUUID(),
+                heoDo: 0,
+                heoDen: 0,
+                doiThong: 1,
+                sequence: defaultSeq,
+            },
+        ]);
+    };
+
+    const updateChatEvent = (updated: ChatEvent) => {
+        setChatEvents(chatEvents.map((ev) => (ev.id === updated.id ? updated : ev)));
+    };
+
+    const removeChatEvent = (id: string) => {
+        setChatEvents(chatEvents.filter((ev) => ev.id !== id));
     };
 
     const hasActiveData = (tabName: string): boolean => {
+        if (tabName === "CHẶT / CHẶT ĐÈ") {
+            return chatEvents.some(
+                (ev) =>
+                    ev.sequence.length >= 2 &&
+                    (ev.heoDo > 0 || ev.heoDen > 0 || ev.doiThong > 0),
+            );
+        }
         if (tabName === "ĂN PHẠT HEO") {
             return (
                 Object.values(anHeoSelection).some(
@@ -246,27 +279,27 @@ export function useScoreState({
         return settings?.penalties?.doiThong ?? 4;
     };
 
-    const getPlayerScore = (name: string): number => {
+    const getPlayerScore = (id: string): number => {
         let score = 0;
-        if (isPlayerBurned(name)) {
+        if (isPlayerBurned(id)) {
             score -= getChetChayPenalty();
         } else {
-            score += getScoreForRank(ranks[name] || null);
+            score += getScoreForRank(ranks[id] || null);
         }
         // Người "ăn" được +penalty cho mỗi người bị cháy
-        if (isPlayerEater(name)) {
+        if (isPlayerEater(id)) {
             score += getChetChayPenalty() * burnedCount;
         }
 
-        // Tính điểm Ăn Heo / Phạt Heo
+        // Tính điểm Ăn Heo / Phạt Heo (Legacy & đơn lẻ)
         const heoValues = getHeoValues();
-        const anHeo = anHeoSelection[name];
+        const anHeo = anHeoSelection[id];
         if (anHeo) {
             score += heoValues.do * (anHeo.do || 0);
             score += heoValues.den * (anHeo.den || 0);
         }
 
-        const phatHeo = phatHeoSelection[name];
+        const phatHeo = phatHeoSelection[id];
         if (phatHeo) {
             score -= heoValues.do * (phatHeo.do || 0);
             score -= heoValues.den * (phatHeo.den || 0);
@@ -274,33 +307,39 @@ export function useScoreState({
 
         // Tính điểm Chết Heo (thối heo)
         const chetHeoValues = getChetHeoValues();
-        const chetHeo = chetHeoSelection[name];
+        const chetHeo = chetHeoSelection[id];
         if (chetHeo) {
             score -= chetHeoValues.do * (chetHeo.do || 0);
             score -= chetHeoValues.den * (chetHeo.den || 0);
         }
 
-        // Tính điểm Đôi Thông
+        // Tính điểm Đôi Thông (Legacy)
         const dtValue = getDoiThongPenalty();
-        const dt = doiThongSelection[name];
+        const dt = doiThongSelection[id];
         if (dt) {
             score += dtValue * (dt.an || 0);
             score -= dtValue * (dt.phat || 0);
         }
 
+        // Tính điểm Chặt / Chặt Đè (Cut Stacking)
+        chatEvents.forEach((ev) => {
+            const evScores = calculateEventScores(ev, heoValues, dtValue);
+            score += evScores[id] || 0;
+        });
+
         return score;
     };
 
     // Tất cả người chơi KHÔNG bị cháy phải được xếp hạng
-    const activePlayers = players.filter((p) => !isPlayerBurned(p));
+    const activePlayers = players.filter((p) => !isPlayerBurned(p.id));
     const allRanked =
-        activePlayers.length > 0 && activePlayers.every((p) => ranks[p]);
+        activePlayers.length > 0 && activePlayers.every((p) => ranks[p.id]);
 
     const handleConfirm = () => {
         if (!allRanked) return;
         const scores: Record<string, number> = {};
         players.forEach((p) => {
-            scores[p] = getPlayerScore(p);
+            scores[p.id] = getPlayerScore(p.id);
         });
         onConfirm(scores, {
             ranks,
@@ -309,6 +348,7 @@ export function useScoreState({
             chetHeoSelection,
             chetChaySelection,
             doiThongSelection,
+            chatEvents,
         });
     };
 
@@ -323,6 +363,10 @@ export function useScoreState({
         chetChaySelection,
         setChetChaySelection,
         doiThongSelection,
+        chatEvents,
+        addChatEvent,
+        updateChatEvent,
+        removeChatEvent,
         getGameSettings,
         getChetChayPenalty,
         isPlayerBurned,

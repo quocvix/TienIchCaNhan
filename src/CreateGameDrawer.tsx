@@ -22,13 +22,13 @@ export default function CreateGameDrawer() {
 
     const [heoDo, setHeoDo] = useState("4");
     const [heoDen, setHeoDen] = useState("2");
-    const [chetHeoDo, setChetHeoDo] = useState("2");
-    const [chetHeoDen, setChetHeoDen] = useState("1");
+    const [chetHeoDo, setChetHeoDo] = useState("4");
+    const [chetHeoDen, setChetHeoDen] = useState("2");
     const [chetChay, setChetChay] = useState("4");
     const [doiThong, setDoiThong] = useState("4");
 
     const handleCreateGame = () => {
-        const id = Date.now().toString();
+        const id = crypto.randomUUID();
         const now = new Date();
         const time = `${String(now.getDate()).padStart(2, "0")}/${String(now.getMonth() + 1).padStart(2, "0")} ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
 

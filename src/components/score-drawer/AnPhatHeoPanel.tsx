@@ -1,16 +1,17 @@
 import { X } from "lucide-react";
+import type { Player } from "./types";
 
 interface AnPhatHeoPanelProps {
-    players: string[];
+    players: Player[];
     anHeoSelection: Record<string, { do: number; den: number }>;
     phatHeoSelection: Record<string, { do: number; den: number }>;
     toggleHeo: (
-        name: string,
+        id: string,
         color: "do" | "den",
         type: "an" | "phat" | "chet",
     ) => void;
-    clearAnHeo: (name: string) => void;
-    clearPhatHeo: (name: string) => void;
+    clearAnHeo: (id: string) => void;
+    clearPhatHeo: (id: string) => void;
 }
 
 export default function AnPhatHeoPanel({
@@ -23,18 +24,18 @@ export default function AnPhatHeoPanel({
 }: AnPhatHeoPanelProps) {
     return (
         <div className="flex flex-col gap-0 w-full">
-            {players.map((name) => {
-                const anSelection = anHeoSelection[name] || { do: 0, den: 0 };
-                const phatSelection = phatHeoSelection[name] || { do: 0, den: 0 };
+            {players.map((player) => {
+                const anSelection = anHeoSelection[player.id] || { do: 0, den: 0 };
+                const phatSelection = phatHeoSelection[player.id] || { do: 0, den: 0 };
 
                 return (
                     <div
-                        key={name}
+                        key={player.id}
                         className="flex items-center py-4 border-t border-white/[0.04] first:border-t-0"
                     >
                         {/* Player name on the left */}
                         <div className="w-16 shrink-0 text-sm font-bold text-gray-300 truncate pr-2 border-r border-white/5 h-12 flex items-center">
-                            {name}
+                            {player.name}
                         </div>
 
                         {/* Stacked controls on the right */}
@@ -48,7 +49,7 @@ export default function AnPhatHeoPanel({
                                     <div className="relative">
                                         <button
                                             onClick={() =>
-                                                toggleHeo(name, "do", "an")
+                                                toggleHeo(player.id, "do", "an")
                                             }
                                             className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all border ${
                                                 anSelection.do > 0
@@ -67,7 +68,7 @@ export default function AnPhatHeoPanel({
                                     <div className="relative">
                                         <button
                                             onClick={() =>
-                                                toggleHeo(name, "den", "an")
+                                                toggleHeo(player.id, "den", "an")
                                             }
                                             className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all border ${
                                                 anSelection.den > 0
@@ -85,7 +86,7 @@ export default function AnPhatHeoPanel({
                                     </div>
                                     {/* Clear Ăn Heo */}
                                     <button
-                                        onClick={() => clearAnHeo(name)}
+                                        onClick={() => clearAnHeo(player.id)}
                                         className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all text-gray-600 hover:text-red-400 bg-transparent shrink-0 ${
                                             anSelection.do > 0 || anSelection.den > 0
                                                 ? "opacity-100 cursor-pointer"
@@ -106,7 +107,7 @@ export default function AnPhatHeoPanel({
                                     <div className="relative">
                                         <button
                                             onClick={() =>
-                                                toggleHeo(name, "do", "phat")
+                                                toggleHeo(player.id, "do", "phat")
                                             }
                                             className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all border ${
                                                 phatSelection.do > 0
@@ -125,7 +126,7 @@ export default function AnPhatHeoPanel({
                                     <div className="relative">
                                         <button
                                             onClick={() =>
-                                                toggleHeo(name, "den", "phat")
+                                                toggleHeo(player.id, "den", "phat")
                                             }
                                             className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all border ${
                                                 phatSelection.den > 0
@@ -143,7 +144,7 @@ export default function AnPhatHeoPanel({
                                     </div>
                                     {/* Clear Phạt Heo */}
                                     <button
-                                        onClick={() => clearPhatHeo(name)}
+                                        onClick={() => clearPhatHeo(player.id)}
                                         className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all text-gray-600 hover:text-red-400 bg-transparent shrink-0 ${
                                             phatSelection.do > 0 || phatSelection.den > 0
                                                 ? "opacity-100 cursor-pointer"

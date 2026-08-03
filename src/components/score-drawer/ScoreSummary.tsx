@@ -1,8 +1,10 @@
+import type { Player } from "./types";
+
 interface ScoreSummaryProps {
-    players: string[];
-    isPlayerBurned: (name: string) => boolean;
-    isPlayerEater: (name: string) => boolean;
-    getPlayerScore: (name: string) => number;
+    players: Player[];
+    isPlayerBurned: (id: string) => boolean;
+    isPlayerEater: (id: string) => boolean;
+    getPlayerScore: (id: string) => number;
     getChetChayPenalty: () => number;
     burnedCount: number;
     getHeoValues: () => { do: number; den: number };
@@ -35,13 +37,13 @@ export default function ScoreSummary({
                 Tổng kết ván này
             </h3>
             <div className="bg-[#151517] rounded-3xl p-5 border border-white/[0.03] space-y-4">
-                {players.map((name) => {
-                    const burned = isPlayerBurned(name);
-                    const eater = isPlayerEater(name);
-                    const score = getPlayerScore(name);
+                {players.map((player) => {
+                    const burned = isPlayerBurned(player.id);
+                    const eater = isPlayerEater(player.id);
+                    const score = getPlayerScore(player.id);
                     return (
                         <div
-                            key={name}
+                            key={player.id}
                             className="flex justify-between items-center"
                         >
                             <div className="flex items-center gap-2">
@@ -54,7 +56,7 @@ export default function ScoreSummary({
                                               : "text-gray-300"
                                     }`}
                                 >
-                                    {name}
+                                    {player.name}
                                 </span>
                                 {burned && (
                                     <span className="text-[9px] font-bold text-red-400/70 bg-red-500/10 px-1.5 py-0.5 rounded">
@@ -68,8 +70,8 @@ export default function ScoreSummary({
                                 )}
                                 {(() => {
                                     const heoValues = getHeoValues();
-                                    const anHeo = anHeoSelection[name];
-                                    const phatHeo = phatHeoSelection[name];
+                                    const anHeo = anHeoSelection[player.id];
+                                    const phatHeo = phatHeoSelection[player.id];
                                     return (
                                         <>
                                             {anHeo && (
@@ -132,7 +134,7 @@ export default function ScoreSummary({
                                                 const chetHeoValues =
                                                     getChetHeoValues();
                                                 const chetHeo =
-                                                    chetHeoSelection[name];
+                                                    chetHeoSelection[player.id];
                                                 if (!chetHeo) return null;
                                                 return (
                                                     <>
@@ -167,7 +169,7 @@ export default function ScoreSummary({
                                                 const dtValue =
                                                     getDoiThongPenalty();
                                                 const dt =
-                                                    doiThongSelection[name];
+                                                    doiThongSelection[player.id];
                                                 if (!dt) return null;
                                                 return (
                                                     <>

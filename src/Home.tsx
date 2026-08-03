@@ -18,11 +18,13 @@ import {
 import CreateGameDrawer from "./CreateGameDrawer.tsx";
 import pokerIcon from "./assets/icons8-poker-94.png";
 
+import type { Player } from "@/types";
+
 interface GameSession {
     id: string;
     time: string;
-    players: string[];
-    history: Record<string, number>[];
+    players: Player[];
+    history: any[];
 }
 
 export default function Home() {
@@ -32,7 +34,14 @@ export default function Home() {
     useEffect(() => {
         const stored = localStorage.getItem("game_history");
         if (stored) {
-            setGames(JSON.parse(stored));
+            const rawGames = JSON.parse(stored);
+            const normalized = rawGames.map((g: any) => ({
+                ...g,
+                players: (g.players || []).map((p: any) =>
+                    typeof p === "string" ? { id: p, name: p } : p
+                ),
+            }));
+            setGames(normalized);
         } else {
             localStorage.setItem("game_history", JSON.stringify([]));
             setGames([]);
@@ -79,7 +88,7 @@ export default function Home() {
             <Drawer>
                 <DrawerTrigger asChild>
                     <div className="mt-4 relative bg-[#d60000] rounded-[2rem] p-6 flex items-center justify-between cursor-pointer overflow-hidden shadow-[0_4px_30px_rgba(214,0,0,0.3)] active:scale-95 transition-transform">
-                        <div className="relative z-10 w-[88px] h-[88px] bg-white rounded-2xl flex items-center justify-center shadow-inner overflow-hidden">
+                        <div className="relative pr-2 z-10 w-[88px] h-[88px] bg-white rounded-2xl flex items-center justify-center shadow-inner overflow-hidden">
                             <img
                                 className="w-full h-full object-cover"
                                 src={pokerIcon}
@@ -87,7 +96,7 @@ export default function Home() {
                             />
                         </div>
                         <div className="relative z-10 flex items-center gap-1 pr-2">
-                            <span className="text-[32px] font-bold text-white tracking-tight leading-none">
+                            <span className="text-[28px] font-bold text-white tracking-tight leading-none">
                                 Tạo Ván Mới
                             </span>
                             <Plus
@@ -122,12 +131,20 @@ export default function Home() {
                 ) : (
                     games.map((item) => {
                         const roundCount = item.history.length;
-                        const playerScores = item.players.map((name) => {
+                        const playerScores = item.players.map((player) => {
                             const score = item.history.reduce(
-                                (sum, round) => sum + (round[name] || 0),
+                                (sum: number, round: any) => {
+                                    const roundScores = round.scores || round;
+                                    return (
+                                        sum +
+                                        (roundScores[player.id] ??
+                                            roundScores[player.name] ??
+                                            0)
+                                    );
+                                },
                                 0,
                             );
-                            return { name, score };
+                            return { player, score };
                         });
 
                         return (
@@ -225,9 +242,9 @@ export default function Home() {
                                 {/* Players List */}
                                 {playerScores.length > 0 && (
                                     <div className="border-t border-white/5 pt-3 flex flex-col gap-2.5 pl-2 pr-2">
-                                        {playerScores.map((player, pIdx) => (
+                                        {playerScores.map(({ player, score }) => (
                                             <div
-                                                key={pIdx}
+                                                key={player.id}
                                                 className="flex items-center justify-between"
                                             >
                                                 <span className="text-sm font-semibold text-gray-300">
@@ -235,16 +252,16 @@ export default function Home() {
                                                 </span>
                                                 <span
                                                     className={`text-xs font-bold px-2 py-0.5 rounded-lg border font-mono ${
-                                                        player.score > 0
+                                                        score > 0
                                                             ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/10"
-                                                            : player.score < 0
+                                                            : score < 0
                                                               ? "bg-[#ff3333]/10 text-[#ff3333] border-[#ff3333]/10"
                                                               : "bg-gray-500/10 text-gray-400 border-gray-500/10"
                                                     }`}
                                                 >
-                                                    {player.score > 0
-                                                        ? `+${player.score}`
-                                                        : player.score}
+                                                    {score > 0
+                                                        ? `+${score}`
+                                                        : score}
                                                 </span>
                                             </div>
                                         ))}
