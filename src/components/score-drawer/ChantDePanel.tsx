@@ -1,4 +1,4 @@
-import { Plus, Trash2, ChevronRight } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Player, ChatEvent } from "./types";
 
@@ -36,8 +36,8 @@ export function calculateEventScores(
         if (p0) scores[p0] = (scores[p0] || 0) - basePoints;
         if (p1) scores[p1] = (scores[p1] || 0) + basePoints;
     } else {
-        // Chặt đè: P0 thoát phạt (0), các người bị chặt đè trước P(len-1) bị 0, 
-        // Người bị chặt đè sau cùng P(len-2) bị phạt gấp đôi (basePoints * 2^(len-2)), 
+        // Chặt đè: P0 thoát phạt (0), các người bị chặt đè trước P(len-1) bị 0,
+        // Người bị chặt đè sau cùng P(len-2) bị phạt gấp đôi (basePoints * 2^(len-2)),
         // Người chặt đè sau cùng P(len-1) được ăn gấp đôi.
         const multiplier = Math.pow(2, len - 2);
         const finalPoints = basePoints * multiplier;
@@ -71,7 +71,8 @@ export default function ChantDePanel({
                     Lượt Chặt / Chặt Đè (Tiến Lên)
                 </span>
                 <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">
-                    Heo đỏ: {heoValues.do}đ • Heo đen: {heoValues.den}đ • Hàng: {doiThongPenalty}đ
+                    Heo đỏ: {heoValues.do}đ • Heo đen: {heoValues.den}đ • Hàng:{" "}
+                    {doiThongPenalty}đ
                 </span>
             </div>
 
@@ -97,13 +98,19 @@ export default function ChantDePanel({
                             doiThongPenalty,
                         );
 
-                        const toggleCard = (type: "heoDo" | "heoDen" | "doiThong") => {
+                        const toggleCard = (
+                            type: "heoDo" | "heoDen" | "doiThong",
+                        ) => {
                             const current = event[type] || 0;
-                            const next = current === 0 ? 1 : current === 1 ? 2 : 0;
+                            const next =
+                                current === 0 ? 1 : current === 1 ? 2 : 0;
                             onUpdateEvent({ ...event, [type]: next });
                         };
 
-                        const setSequencePlayer = (index: number, playerId: string) => {
+                        const setSequencePlayer = (
+                            index: number,
+                            playerId: string,
+                        ) => {
                             const newSeq = [...event.sequence];
                             newSeq[index] = playerId;
                             onUpdateEvent({ ...event, sequence: newSeq });
@@ -117,7 +124,10 @@ export default function ChantDePanel({
                                 );
                                 onUpdateEvent({
                                     ...event,
-                                    sequence: [...event.sequence, unused?.id || ""],
+                                    sequence: [
+                                        ...event.sequence,
+                                        unused?.id || "",
+                                    ],
                                 });
                             }
                         };
@@ -188,7 +198,9 @@ export default function ChantDePanel({
                                         </button>
 
                                         <button
-                                            onClick={() => toggleCard("doiThong")}
+                                            onClick={() =>
+                                                toggleCard("doiThong")
+                                            }
                                             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border relative ${
                                                 event.doiThong > 0
                                                     ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
@@ -211,7 +223,8 @@ export default function ChantDePanel({
                                         <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
                                             2. Thứ tự chặt / chặt đè:
                                         </span>
-                                        {event.sequence.length < players.length && (
+                                        {event.sequence.length <
+                                            players.length && (
                                             <button
                                                 onClick={addSequenceStep}
                                                 className="text-[10px] font-bold text-emerald-400 hover:text-emerald-300 uppercase tracking-wider"
@@ -222,61 +235,78 @@ export default function ChantDePanel({
                                     </div>
 
                                     <div className="flex flex-col gap-2">
-                                        {event.sequence.map((selectedId, sIdx) => {
-                                            const roleLabel =
-                                                sIdx === 0
-                                                    ? "Ra bài (Bị chặt)"
-                                                    : sIdx === 1
-                                                      ? "Người Chặt"
-                                                      : `Chặt Đè ${sIdx > 2 ? `(${sIdx})` : "đôi thông"}`;
+                                        {event.sequence.map(
+                                            (selectedId, sIdx) => {
+                                                const roleLabel =
+                                                    sIdx === 0
+                                                        ? "Ra bài (Bị chặt)"
+                                                        : sIdx === 1
+                                                          ? "Người Chặt"
+                                                          : `Chặt Đè ${sIdx > 2 ? `(${sIdx})` : "đôi thông"}`;
 
-                                            return (
-                                                <div
-                                                    key={sIdx}
-                                                    className="flex items-center gap-2 bg-[#121214] p-2 rounded-xl border border-white/[0.04]"
-                                                >
-                                                    <span className="text-[10px] font-bold text-gray-400 w-28 shrink-0">
-                                                        {sIdx + 1}. {roleLabel}:
-                                                    </span>
-
-                                                    <select
-                                                        value={selectedId}
-                                                        onChange={(e) =>
-                                                            setSequencePlayer(
-                                                                sIdx,
-                                                                e.target.value,
-                                                            )
-                                                        }
-                                                        className="flex-1 bg-[#1c1c1e] border border-white/10 rounded-lg py-1 px-2 text-xs font-bold text-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                                                return (
+                                                    <div
+                                                        key={sIdx}
+                                                        className="flex items-center gap-2 bg-[#121214] p-2 rounded-xl border border-white/[0.04]"
                                                     >
-                                                        <option value="">
-                                                            -- Chọn người chơi --
-                                                        </option>
-                                                        {players.map((p) => (
-                                                            <option
-                                                                key={p.id}
-                                                                value={p.id}
-                                                            >
-                                                                {p.name}
-                                                            </option>
-                                                        ))}
-                                                    </select>
+                                                        <span className="text-[10px] font-bold text-gray-400 w-28 shrink-0">
+                                                            {sIdx + 1}.{" "}
+                                                            {roleLabel}:
+                                                        </span>
 
-                                                    {sIdx >= 2 &&
-                                                        sIdx ===
-                                                            event.sequence.length - 1 && (
-                                                            <button
-                                                                onClick={
-                                                                    removeLastSequenceStep
-                                                                }
-                                                                className="text-gray-500 hover:text-red-400 p-1"
-                                                            >
-                                                                <Trash2 size={14} />
-                                                            </button>
-                                                        )}
-                                                </div>
-                                            );
-                                        })}
+                                                        <select
+                                                            value={selectedId}
+                                                            onChange={(e) =>
+                                                                setSequencePlayer(
+                                                                    sIdx,
+                                                                    e.target
+                                                                        .value,
+                                                                )
+                                                            }
+                                                            className="flex-1 bg-[#1c1c1e] border border-white/10 rounded-lg py-1 px-2 text-xs font-bold text-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                                                        >
+                                                            <option value="">
+                                                                -- Chọn người
+                                                                chơi --
+                                                            </option>
+                                                            {players.map(
+                                                                (p) => (
+                                                                    <option
+                                                                        key={
+                                                                            p.id
+                                                                        }
+                                                                        value={
+                                                                            p.id
+                                                                        }
+                                                                    >
+                                                                        {p.name}
+                                                                    </option>
+                                                                ),
+                                                            )}
+                                                        </select>
+
+                                                        {sIdx >= 2 &&
+                                                            sIdx ===
+                                                                event.sequence
+                                                                    .length -
+                                                                    1 && (
+                                                                <button
+                                                                    onClick={
+                                                                        removeLastSequenceStep
+                                                                    }
+                                                                    className="text-gray-500 hover:text-red-400 p-1"
+                                                                >
+                                                                    <Trash2
+                                                                        size={
+                                                                            14
+                                                                        }
+                                                                    />
+                                                                </button>
+                                                            )}
+                                                    </div>
+                                                );
+                                            },
+                                        )}
                                     </div>
                                 </div>
 
@@ -288,7 +318,10 @@ export default function ChantDePanel({
                                         </span>
                                         {players.map((p) => {
                                             const sc = eventScores[p.id] || 0;
-                                            if (sc === 0 && !event.sequence.includes(p.id))
+                                            if (
+                                                sc === 0 &&
+                                                !event.sequence.includes(p.id)
+                                            )
                                                 return null;
                                             const isFreed =
                                                 sc === 0 &&
@@ -304,7 +337,8 @@ export default function ChantDePanel({
                                                               : "bg-gray-500/10 text-gray-400 border-gray-500/20"
                                                     }`}
                                                 >
-                                                    {p.name}: {sc > 0 ? `+${sc}` : sc}
+                                                    {p.name}:{" "}
+                                                    {sc > 0 ? `+${sc}` : sc}
                                                     {isFreed ? " (Thoát)" : ""}
                                                 </span>
                                             );

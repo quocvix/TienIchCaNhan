@@ -30,7 +30,10 @@ export default function ChetHeoPanel({
                 </span>
             </div>
             {players.map((player) => {
-                const selection = chetHeoSelection[player.id] || { do: 0, den: 0 };
+                const selection = chetHeoSelection[player.id] || {
+                    do: 0,
+                    den: 0,
+                };
                 return (
                     <div
                         key={player.id}
@@ -42,7 +45,9 @@ export default function ChetHeoPanel({
                         <div className="flex items-center gap-2">
                             <div className="relative">
                                 <button
-                                    onClick={() => toggleHeo(player.id, "do", "chet")}
+                                    onClick={() =>
+                                        toggleHeo(player.id, "do", "chet")
+                                    }
                                     className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
                                         selection.do > 0
                                             ? "bg-red-500/20 text-red-400 border-red-500/30"
@@ -59,7 +64,9 @@ export default function ChetHeoPanel({
                             </div>
                             <div className="relative">
                                 <button
-                                    onClick={() => toggleHeo(player.id, "den", "chet")}
+                                    onClick={() =>
+                                        toggleHeo(player.id, "den", "chet")
+                                    }
                                     className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
                                         selection.den > 0
                                             ? "bg-white/20 text-white border-white/30"
