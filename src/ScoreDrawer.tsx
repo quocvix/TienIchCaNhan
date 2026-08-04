@@ -229,7 +229,7 @@ export default function ScoreDrawer({
             {/* Footer */}
             <div
                 className="p-4 border-t border-white/5 shrink-0 bg-[#0f0f12] flex flex-col gap-3 transition-[padding] duration-150"
-                style={{ paddingBottom: `calc(1rem + ${bottomOffset}px)` }}
+                style={{ paddingBottom: `calc(1rem + env(safe-area-inset-bottom, 0px) + ${bottomOffset}px)` }}
             >
                 {!allRanked && (
                     <div className="flex items-center justify-center gap-2 p-3 bg-[#2a1b14] border border-orange-950/40 text-[#df8743] rounded-2xl text-xs font-bold">

@@ -55,7 +55,7 @@ export default function Home() {
     };
 
     return (
-        <div className="min-h-screen w-full relative bg-black text-white font-sans sm:hidden p-4 flex flex-col gap-6 overflow-x-hidden">
+        <div className="min-h-[100dvh] min-h-screen w-full relative bg-black text-white font-sans sm:hidden p-4 flex flex-col gap-6 overflow-x-hidden">
             {/* Blue Spotlight Background */}
             <div
                 className="absolute inset-0 z-0 pointer-events-none"

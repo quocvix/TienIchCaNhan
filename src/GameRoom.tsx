@@ -211,7 +211,10 @@ export default function GameRoom() {
     };
 
     return (
-        <div className="h-[100dvh] h-screen max-h-screen w-full relative bg-black text-white font-sans sm:hidden flex flex-col overflow-hidden">
+        <div
+            className="w-full relative bg-black text-white font-sans sm:hidden flex flex-col overflow-hidden"
+            style={{ height: "var(--vv-height, 100dvh)" }}
+        >
             {/* Blue Spotlight Background */}
             <div
                 className="absolute inset-0 z-0 pointer-events-none"
@@ -437,7 +440,7 @@ export default function GameRoom() {
             {/* Bottom Action */}
             <div 
                 className="p-4 bg-[#0a0a0a]/95 backdrop-blur-md border-t border-white/5 shrink-0 relative z-20 transition-[padding] duration-150"
-                style={{ paddingBottom: `calc(1rem + ${bottomOffset}px)` }}
+                style={{ paddingBottom: `calc(1rem + env(safe-area-inset-bottom, 0px) + ${bottomOffset}px)` }}
             >
                 {!hasPlayers ? (
                     <Button
