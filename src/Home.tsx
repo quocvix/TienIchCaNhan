@@ -1,6 +1,14 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, Spade, Trash2, ChevronRight, History, Eye, EyeOff } from "lucide-react";
+import {
+    Plus,
+    Spade,
+    Trash2,
+    ChevronRight,
+    History,
+    Eye,
+    EyeOff,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import {
@@ -39,7 +47,7 @@ export default function Home() {
                 const normalized = rawGames.map((g: any) => ({
                     ...g,
                     players: (g.players || []).map((p: any) =>
-                        typeof p === "string" ? { id: p, name: p } : p
+                        typeof p === "string" ? { id: p, name: p } : p,
                     ),
                 }));
                 setGames(normalized);
@@ -59,7 +67,9 @@ export default function Home() {
         localStorage.setItem("game_history", JSON.stringify(updated));
     };
 
-    const [revealedGames, setRevealedGames] = useState<Record<string, boolean>>({});
+    const [revealedGames, setRevealedGames] = useState<Record<string, boolean>>(
+        {},
+    );
 
     const toggleRevealGame = (id: string, e: React.MouseEvent) => {
         e.stopPropagation();
@@ -91,7 +101,10 @@ export default function Home() {
                 <div className="flex items-center justify-between pt-1">
                     <div className="flex items-center gap-2.5">
                         <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-red-500 to-rose-700 flex items-center justify-center text-white shadow-lg shadow-red-500/20">
-                            <Spade size={20} className="fill-white stroke-none" />
+                            <Spade
+                                size={20}
+                                className="fill-white stroke-none"
+                            />
                         </div>
                         <div className="flex flex-col">
                             <h1 className="text-lg font-black tracking-tight text-white leading-tight flex items-center gap-1.5">
@@ -178,7 +191,11 @@ export default function Home() {
                                     Chưa có bàn chơi nào
                                 </h3>
                                 <p className="text-xs text-gray-400 max-w-[220px] leading-relaxed">
-                                    Nhấn <span className="text-red-400 font-semibold">Tạo Ván Mới</span> để bắt đầu tính điểm cùng bạn bè ngay!
+                                    Nhấn{" "}
+                                    <span className="text-red-400 font-semibold">
+                                        Tạo Ván Mới
+                                    </span>{" "}
+                                    để bắt đầu tính điểm cùng bạn bè ngay!
                                 </p>
                             </div>
                         </div>
@@ -186,31 +203,38 @@ export default function Home() {
                         <div className="flex flex-col gap-3">
                             {games.map((item) => {
                                 const roundCount = item.history?.length || 0;
-                                const playerScores = (item.players || []).map((player) => {
-                                    const score = (item.history || []).reduce(
-                                        (sum: number, round: any) => {
-                                            const roundScores = round.scores || round;
+                                const playerScores = (item.players || []).map(
+                                    (player) => {
+                                        const score = (
+                                            item.history || []
+                                        ).reduce((sum: number, round: any) => {
+                                            const roundScores =
+                                                round.scores || round;
                                             return (
                                                 sum +
                                                 (roundScores[player.id] ??
                                                     roundScores[player.name] ??
                                                     0)
                                             );
-                                        },
-                                        0
-                                    );
-                                    return { player, score };
-                                });
+                                        }, 0);
+                                        return { player, score };
+                                    },
+                                );
 
                                 // Find highest score leader
-                                const topScorer = playerScores.length > 0 && roundCount > 0
-                                    ? [...playerScores].sort((a, b) => b.score - a.score)[0]
-                                    : null;
+                                const topScorer =
+                                    playerScores.length > 0 && roundCount > 0
+                                        ? [...playerScores].sort(
+                                              (a, b) => b.score - a.score,
+                                          )[0]
+                                        : null;
 
                                 return (
                                     <div
                                         key={item.id}
-                                        onClick={() => navigate(`/room?id=${item.id}`)}
+                                        onClick={() =>
+                                            navigate(`/room?id=${item.id}`)
+                                        }
                                         className="bg-[#111624] hover:bg-[#161c2e] border border-white/[0.07] rounded-3xl p-4 flex flex-col gap-3.5 relative overflow-hidden cursor-pointer active:scale-[0.98] transition-all shadow-md shadow-black/30 group"
                                     >
                                         {/* Left accent pill */}
@@ -240,14 +264,18 @@ export default function Home() {
                                             {/* Action Button: Delete Game */}
                                             <div
                                                 className="relative z-20 flex items-center gap-1"
-                                                onClick={(e) => e.stopPropagation()}
+                                                onClick={(e) =>
+                                                    e.stopPropagation()
+                                                }
                                             >
                                                 <AlertDialog>
                                                     <AlertDialogTrigger asChild>
                                                         <Button
                                                             variant="ghost"
                                                             size="icon"
-                                                            onClick={(e) => e.stopPropagation()}
+                                                            onClick={(e) =>
+                                                                e.stopPropagation()
+                                                            }
                                                             className="text-gray-400 hover:text-red-400 hover:bg-red-950/30 rounded-xl h-10 w-10 flex items-center justify-center"
                                                         >
                                                             <Trash2 size={18} />
@@ -256,33 +284,48 @@ export default function Home() {
                                                     <AlertDialogContent
                                                         size="sm"
                                                         className="bg-[#0f1422] border-white/10 text-white rounded-3xl p-6"
-                                                        onClick={(e) => e.stopPropagation()}
+                                                        onClick={(e) =>
+                                                            e.stopPropagation()
+                                                        }
                                                     >
                                                         <AlertDialogHeader>
                                                             <AlertDialogMedia className="bg-red-500/10 text-red-500 mx-auto">
-                                                                <Trash2 size={24} />
+                                                                <Trash2
+                                                                    size={24}
+                                                                />
                                                             </AlertDialogMedia>
                                                             <AlertDialogTitle className="text-center text-white text-lg font-bold">
                                                                 Xóa bàn chơi?
                                                             </AlertDialogTitle>
                                                             <AlertDialogDescription className="text-center text-gray-400 text-xs">
-                                                                Toàn bộ lịch sử điểm số của bàn này sẽ bị xóa vĩnh viễn và không thể khôi phục.
+                                                                Toàn bộ lịch sử
+                                                                điểm số của bàn
+                                                                này sẽ bị xóa
+                                                                vĩnh viễn và
+                                                                không thể khôi
+                                                                phục.
                                                             </AlertDialogDescription>
                                                         </AlertDialogHeader>
                                                         <AlertDialogFooter className="flex gap-2.5 mt-2">
                                                             <AlertDialogCancel
                                                                 variant="outline"
                                                                 className="flex-1 rounded-xl h-11 bg-white/5 border-white/10 text-white hover:bg-white/10"
-                                                                onClick={(e) => e.stopPropagation()}
+                                                                onClick={(e) =>
+                                                                    e.stopPropagation()
+                                                                }
                                                             >
                                                                 Hủy
                                                             </AlertDialogCancel>
                                                             <AlertDialogAction
                                                                 variant="destructive"
                                                                 className="flex-1 rounded-xl h-11 bg-red-600 hover:bg-red-500 text-white font-bold"
-                                                                onClick={(e) => {
+                                                                onClick={(
+                                                                    e,
+                                                                ) => {
                                                                     e.stopPropagation();
-                                                                    handleDeleteGame(item.id);
+                                                                    handleDeleteGame(
+                                                                        item.id,
+                                                                    );
                                                                 }}
                                                             >
                                                                 Xóa
@@ -298,67 +341,106 @@ export default function Home() {
                                         </div>
 
                                         {/* Player Scores Mini Row */}
-                                        {playerScores.length > 0 && (() => {
-                                            const isRevealed = !!revealedGames[item.id];
-                                            return (
-                                                <div className="border-t border-white/[0.06] pt-2.5 pl-2 flex items-center justify-between gap-2 flex-wrap">
-                                                    <div className="flex items-center gap-1.5 flex-wrap flex-1">
-                                                        {playerScores.map(({ player, score }) => {
-                                                            const isLeader =
-                                                                isRevealed &&
-                                                                topScorer &&
-                                                                topScorer.player.id === player.id &&
-                                                                topScorer.score > 0;
-                                                            return (
-                                                                <div
-                                                                    key={player.id}
-                                                                    className="flex items-center gap-1.5 bg-[#0a0d16] px-2.5 py-1 rounded-xl border border-white/5"
-                                                                >
-                                                                    {isLeader && (
-                                                                        <span className="text-[10px]">👑</span>
-                                                                    )}
-                                                                    <span className="text-[12px] font-bold text-gray-300 max-w-[80px] truncate">
-                                                                        {player.name}
-                                                                    </span>
-                                                                    {isRevealed && (
-                                                                        <span
-                                                                            className={`text-[11px] font-black font-mono ${
-                                                                                score > 0
-                                                                                    ? "text-emerald-400"
-                                                                                    : score < 0
-                                                                                      ? "text-rose-400"
-                                                                                      : "text-gray-400"
-                                                                            }`}
+                                        {playerScores.length > 0 &&
+                                            (() => {
+                                                const isRevealed =
+                                                    !!revealedGames[item.id];
+                                                return (
+                                                    <div className="border-t border-white/[0.06] pt-2.5 pl-2 flex items-center justify-between gap-2 flex-wrap">
+                                                        <div className="flex items-center gap-1.5 flex-wrap flex-1">
+                                                            {playerScores.map(
+                                                                ({
+                                                                    player,
+                                                                    score,
+                                                                }) => {
+                                                                    const isLeader =
+                                                                        isRevealed &&
+                                                                        topScorer &&
+                                                                        topScorer
+                                                                            .player
+                                                                            .id ===
+                                                                            player.id &&
+                                                                        topScorer.score >
+                                                                            0;
+                                                                    return (
+                                                                        <div
+                                                                            key={
+                                                                                player.id
+                                                                            }
+                                                                            className="flex items-center gap-1.5 bg-[#0a0d16] px-2.5 py-1 rounded-xl border border-white/5"
                                                                         >
-                                                                            {score > 0 ? `+${score}` : score}
-                                                                        </span>
-                                                                    )}
-                                                                </div>
-                                                            );
-                                                        })}
-                                                    </div>
+                                                                            {isLeader && (
+                                                                                <span className="text-[10px]">
+                                                                                    👑
+                                                                                </span>
+                                                                            )}
+                                                                            <span className="text-[12px] font-bold text-gray-300 max-w-[80px] truncate">
+                                                                                {
+                                                                                    player.name
+                                                                                }
+                                                                            </span>
+                                                                            {isRevealed && (
+                                                                                <span
+                                                                                    className={`text-[11px] font-black font-mono ${
+                                                                                        score >
+                                                                                        0
+                                                                                            ? "text-emerald-400"
+                                                                                            : score <
+                                                                                                0
+                                                                                              ? "text-rose-400"
+                                                                                              : "text-gray-400"
+                                                                                    }`}
+                                                                                >
+                                                                                    {score >
+                                                                                    0
+                                                                                        ? `+${score}`
+                                                                                        : score}
+                                                                                </span>
+                                                                            )}
+                                                                        </div>
+                                                                    );
+                                                                },
+                                                            )}
+                                                        </div>
 
-                                                    {/* Reveal Scores Toggle Button */}
-                                                    <button
-                                                        type="button"
-                                                        onClick={(e) => toggleRevealGame(item.id, e)}
-                                                        className="flex items-center gap-1 px-2.5 py-1 rounded-xl text-[11px] font-bold bg-white/5 hover:bg-white/10 text-amber-400 border border-amber-400/25 active:scale-95 transition-all shrink-0"
-                                                    >
-                                                        {isRevealed ? (
-                                                            <>
-                                                                <EyeOff size={13} />
-                                                                <span>Ẩn điểm</span>
-                                                            </>
-                                                        ) : (
-                                                            <>
-                                                                <Eye size={13} />
-                                                                <span>Xem điểm</span>
-                                                            </>
-                                                        )}
-                                                    </button>
-                                                </div>
-                                            );
-                                        })()}
+                                                        {/* Reveal Scores Toggle Button */}
+                                                        <button
+                                                            type="button"
+                                                            onClick={(e) =>
+                                                                toggleRevealGame(
+                                                                    item.id,
+                                                                    e,
+                                                                )
+                                                            }
+                                                            className="flex items-center gap-1 px-2.5 py-1 rounded-xl text-[11px] font-bold bg-white/5 hover:bg-white/10 text-amber-400 border border-amber-400/25 active:scale-95 transition-all shrink-0"
+                                                        >
+                                                            {isRevealed ? (
+                                                                <>
+                                                                    <EyeOff
+                                                                        size={
+                                                                            13
+                                                                        }
+                                                                    />
+                                                                    <span>
+                                                                        Ẩn điểm
+                                                                    </span>
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    <Eye
+                                                                        size={
+                                                                            13
+                                                                        }
+                                                                    />
+                                                                    <span>
+                                                                        Xem điểm
+                                                                    </span>
+                                                                </>
+                                                            )}
+                                                        </button>
+                                                    </div>
+                                                );
+                                            })()}
                                     </div>
                                 );
                             })}

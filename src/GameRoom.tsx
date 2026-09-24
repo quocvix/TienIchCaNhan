@@ -330,7 +330,9 @@ export default function GameRoom() {
                                     Xem báo cáo tổng kết?
                                 </AlertDialogTitle>
                                 <AlertDialogDescription className="text-center text-gray-400 text-xs">
-                                    Xác nhận hiển thị bảng điểm số chi tiết của tất cả người chơi. Điểm số và thứ hạng sẽ được công khai.
+                                    Xác nhận hiển thị bảng điểm số chi tiết của
+                                    tất cả người chơi. Điểm số và thứ hạng sẽ
+                                    được công khai.
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter className="flex gap-2.5 mt-2">
