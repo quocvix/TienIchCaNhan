@@ -78,34 +78,37 @@ export default function ScoreDrawer({
     } = useScoreState({ players, onConfirm, initialData });
 
     return (
-        <div className="flex flex-col flex-1 min-h-0 bg-[#0a0a0a] text-white font-sans sm:hidden">
+        <div className="flex flex-col flex-1 min-h-0 bg-[#0c101b] text-white font-sans">
+            {/* Drag Handle */}
+            <div className="w-12 h-1.5 rounded-full bg-white/20 mx-auto my-2 shrink-0" />
+
             {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-white/5 shrink-0 bg-[#0f0f12]">
+            <div className="flex items-center justify-between p-4 border-b border-white/[0.08] shrink-0 bg-[#0f1422]">
                 <div className="flex items-center gap-3">
                     {initialData ? (
-                        <div className="w-10 h-10 rounded-xl bg-orange-950/40 flex items-center justify-center text-orange-500">
+                        <div className="w-10 h-10 rounded-xl bg-orange-950/40 flex items-center justify-center text-orange-400">
                             <Pencil size={20} />
                         </div>
                     ) : (
-                        <div className="w-10 h-10 rounded-xl bg-emerald-950/40 flex items-center justify-center text-emerald-500">
+                        <div className="w-10 h-10 rounded-xl bg-emerald-950/40 flex items-center justify-center text-emerald-400">
                             <Trophy size={20} />
                         </div>
                     )}
                     <div className="flex flex-col">
-                        <DrawerTitle className="text-lg font-bold leading-tight text-white flex items-center gap-2">
+                        <DrawerTitle className="text-base font-bold leading-tight text-white flex items-center gap-2">
                             <span>
-                                {initialData ? "Chỉnh sửa" : "Ghi điểm"}
+                                {initialData ? "Chỉnh sửa kết quả" : "Ghi điểm ván"}
                             </span>
-                            {initialData && roundNumber && (
-                                <span className="text-xs font-semibold px-2 py-0.5 rounded bg-orange-500/20 text-orange-400 border border-orange-500/20">
-                                    ván #{roundNumber}
+                            {roundNumber && (
+                                <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-red-500/20 text-red-400 border border-red-500/30">
+                                    Ván #{roundNumber}
                                 </span>
                             )}
                         </DrawerTitle>
-                        <DrawerDescription className="text-[10px] text-gray-500 font-medium">
+                        <DrawerDescription className="text-[11px] text-gray-400">
                             {initialData
-                                ? "Sửa kết quả ván Tiến Lên"
-                                : "Kết thúc ván Tiến Lên"}
+                                ? "Cập nhật lại thứ tự hoặc tiền phạt"
+                                : "Chọn thứ hạng và các trường hợp phạt"}
                         </DrawerDescription>
                     </div>
                 </div>
@@ -113,7 +116,7 @@ export default function ScoreDrawer({
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="flex h-9 w-9 items-center justify-center rounded-full bg-[#1c1c1e] text-gray-400 hover:bg-[#2a2a2c] hover:text-gray-300"
+                        className="flex h-9 w-9 items-center justify-center rounded-full bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white"
                     >
                         <X size={18} />
                     </Button>
@@ -121,7 +124,7 @@ export default function ScoreDrawer({
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-6">
+            <div className="flex-1 overflow-y-auto p-4 space-y-5 mobile-scroll">
                 {/* Thu tu ve dich */}
                 <RankSelection
                     players={players}
@@ -131,11 +134,11 @@ export default function ScoreDrawer({
                 />
 
                 {/* Tùy chọn phạt / thưởng */}
-                <div className="space-y-3">
-                    <h3 className="text-[10px] font-bold tracking-wider text-gray-500 uppercase">
-                        Tùy chọn phạt / thưởng
+                <div className="space-y-2.5">
+                    <h3 className="text-[11px] font-bold tracking-wider text-gray-400 uppercase">
+                        Tùy chọn phạt / chặt heo
                     </h3>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex items-center gap-2 overflow-x-auto mobile-scroll pb-1">
                         {[
                             "ĂN PHẠT HEO",
                             "CHẶT ĐÈ",
@@ -146,16 +149,17 @@ export default function ScoreDrawer({
                             return (
                                 <button
                                     key={item}
+                                    type="button"
                                     onClick={() => setActiveTab(item)}
-                                    className={`px-4 py-2 rounded-xl text-xs uppercase font-bold transition-all border relative ${
+                                    className={`px-3.5 py-2 rounded-xl text-xs uppercase font-bold transition-all border whitespace-nowrap relative shrink-0 touch-haptic ${
                                         isSelected
-                                            ? "bg-[#00a67d] text-white border-[#00a67d]"
-                                            : "bg-transparent text-gray-400 border-white/10 hover:border-white/20"
+                                            ? "bg-red-600 text-white border-red-500 shadow-md shadow-red-600/30"
+                                            : "bg-[#141824] text-gray-400 border-white/5 hover:border-white/10"
                                     }`}
                                 >
                                     {item}
                                     {hasActiveData(item) && (
-                                        <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-emerald-400 border border-[#0a0a0a]" />
+                                        <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-amber-400 border-2 border-[#0c101b]" />
                                     )}
                                 </button>
                             );

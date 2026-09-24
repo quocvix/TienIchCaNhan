@@ -3,6 +3,7 @@ import Home from "./Home.tsx";
 import GameRoom from "./GameRoom.tsx";
 import { ThemeProvider } from "./components/theme-provider.tsx";
 import { useVisualViewport } from "./hooks/useVisualViewport.ts";
+import MobileAppShell from "./components/MobileAppShell.tsx";
 
 function App() {
   useVisualViewport();
@@ -10,10 +11,12 @@ function App() {
   return (
     <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/room" element={<GameRoom />} />
-        </Routes>
+        <MobileAppShell>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/room" element={<GameRoom />} />
+          </Routes>
+        </MobileAppShell>
       </BrowserRouter>
     </ThemeProvider>
   );

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, Spade, Trash2 } from "lucide-react";
+import { Plus, Spade, Trash2, ChevronRight, History, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import {
@@ -34,14 +34,19 @@ export default function Home() {
     useEffect(() => {
         const stored = localStorage.getItem("game_history");
         if (stored) {
-            const rawGames = JSON.parse(stored);
-            const normalized = rawGames.map((g: any) => ({
-                ...g,
-                players: (g.players || []).map((p: any) =>
-                    typeof p === "string" ? { id: p, name: p } : p
-                ),
-            }));
-            setGames(normalized);
+            try {
+                const rawGames = JSON.parse(stored);
+                const normalized = rawGames.map((g: any) => ({
+                    ...g,
+                    players: (g.players || []).map((p: any) =>
+                        typeof p === "string" ? { id: p, name: p } : p
+                    ),
+                }));
+                setGames(normalized);
+            } catch (e) {
+                console.error("Error reading game history", e);
+                setGames([]);
+            }
         } else {
             localStorage.setItem("game_history", JSON.stringify([]));
             setGames([]);
@@ -54,223 +59,312 @@ export default function Home() {
         localStorage.setItem("game_history", JSON.stringify(updated));
     };
 
+    const [revealedGames, setRevealedGames] = useState<Record<string, boolean>>({});
+
+    const toggleRevealGame = (id: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        setRevealedGames((prev) => ({
+            ...prev,
+            [id]: !prev[id],
+        }));
+    };
+
     return (
-        <div className="min-h-screen w-full relative bg-black text-white font-sans sm:hidden p-4 flex flex-col gap-6 overflow-x-hidden">
-            {/* Blue Spotlight Background */}
+        <div className="flex-1 w-full flex flex-col min-h-0 bg-[#07090E] text-white font-sans overflow-y-auto mobile-scroll relative">
+            {/* Ambient Background Glows */}
             <div
-                className="absolute inset-0 z-0 pointer-events-none"
+                className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[280px] pointer-events-none z-0"
                 style={{
                     background: `
                         radial-gradient(
-                            circle at center,
-                            rgba(59, 130, 246, 0.12) 0%,
-                            rgba(59, 130, 246, 0.06) 20%,
-                            rgba(0, 0, 0, 0.0) 60%
+                            circle at 50% 10%,
+                            rgba(239, 68, 68, 0.12) 0%,
+                            rgba(99, 102, 241, 0.06) 50%,
+                            transparent 80%
                         )
                     `,
                 }}
             />
-            {/* Header */}
-            <div className="flex items-center justify-between pt-4">
-                <h1 className="text-2xl font-black bg-gradient-to-r from-purple-500 via-fuchsia-500 to-indigo-500 bg-clip-text text-transparent">
-                    Ghi Điểm Đánh Bài
-                </h1>
-                {/* <Button
-                    variant="ghost"
-                    size="icon"
-                    className="bg-[#1c1c1e] text-gray-400 hover:bg-[#2a2a2c] hover:text-white rounded-2xl h-12 w-12 flex items-center justify-center"
-                >
-                    <Settings size={24} />
-                </Button> */}
-            </div>
 
-            {/* Main Action Card */}
-            <Drawer>
-                <DrawerTrigger asChild>
-                    <div className="mt-4 relative bg-[#d60000] rounded-[2rem] p-6 flex items-center justify-between cursor-pointer overflow-hidden shadow-[0_4px_30px_rgba(214,0,0,0.3)] active:scale-95 transition-transform">
-                        <div className="relative pr-2 z-10 w-[88px] h-[88px] bg-white rounded-2xl flex items-center justify-center shadow-inner overflow-hidden">
-                            <img
-                                className="w-full h-full object-cover"
-                                src={pokerIcon}
-                                alt="playing-cards"
-                            />
+            <div className="relative z-10 flex flex-col p-4 gap-5 pb-8">
+                {/* App Brand Header */}
+                <div className="flex items-center justify-between pt-1">
+                    <div className="flex items-center gap-2.5">
+                        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-red-500 to-rose-700 flex items-center justify-center text-white shadow-lg shadow-red-500/20">
+                            <Spade size={20} className="fill-white stroke-none" />
                         </div>
-                        <div className="relative z-10 flex items-center gap-1 pr-2">
-                            <span className="text-[28px] font-bold text-white tracking-tight leading-none">
-                                Tạo Ván Mới
-                            </span>
-                            <Plus
-                                size={36}
-                                className="text-white"
-                                strokeWidth={2}
-                            />
+                        <div className="flex flex-col">
+                            <h1 className="text-lg font-black tracking-tight text-white leading-tight flex items-center gap-1.5">
+                                TIẾN LÊN PRO
+                                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-red-500/20 text-red-400 border border-red-500/30">
+                                    APP
+                                </span>
+                            </h1>
+                            <p className="text-[11px] font-semibold text-gray-400">
+                                Ghi điểm & quản lý ván bài
+                            </p>
                         </div>
                     </div>
-                </DrawerTrigger>
-                <DrawerContent className="bg-[#0a0a0a] border-white/5 outline-none overflow-hidden p-0 max-h-[90vh]">
-                    <CreateGameDrawer />
-                </DrawerContent>
-            </Drawer>
 
-            {/* History List */}
-            <div className="flex flex-col gap-4 mt-6">
-                {games.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-16 px-4 border border-dashed border-white/10 rounded-[2rem] bg-gradient-to-b from-white/[0.01] to-transparent gap-4">
-                        <div className="w-16 h-16 rounded-full bg-[#2a1114] flex items-center justify-center text-[#ff3333] shadow-[0_0_20px_rgba(255,51,51,0.1)]">
-                            <Spade size={28} />
-                        </div>
-                        <div className="flex flex-col items-center gap-1 text-center">
-                            <span className="text-base font-bold text-white">
-                                Chưa có bàn chơi nào.
-                            </span>
-                            <span className="text-sm text-gray-500 font-medium">
-                                Hãy tạo bàn mới!
-                            </span>
-                        </div>
+                    <div className="flex items-center gap-1.5 bg-[#141824] px-3 py-1.5 rounded-full border border-white/5">
+                        <History size={13} className="text-gray-400" />
+                        <span className="text-xs font-bold text-gray-300 font-mono">
+                            {games.length} bàn
+                        </span>
                     </div>
-                ) : (
-                    games.map((item) => {
-                        const roundCount = item.history.length;
-                        const playerScores = item.players.map((player) => {
-                            const score = item.history.reduce(
-                                (sum: number, round: any) => {
-                                    const roundScores = round.scores || round;
-                                    return (
-                                        sum +
-                                        (roundScores[player.id] ??
-                                            roundScores[player.name] ??
-                                            0)
-                                    );
-                                },
-                                0,
-                            );
-                            return { player, score };
-                        });
+                </div>
 
-                        return (
-                            <div
-                                key={item.id}
-                                onClick={() => navigate(`/room?id=${item.id}`)}
-                                className="bg-[#161618] rounded-3xl p-5 flex flex-col gap-4 relative overflow-hidden cursor-pointer active:scale-[0.99] transition-all"
-                            >
-                                {/* Left red accent line */}
-                                <div className="absolute left-0 top-6 bottom-6 w-1 bg-red-500 rounded-r-full" />
+                {/* Primary Action Card: Tạo Bàn Mới */}
+                <Drawer>
+                    <DrawerTrigger asChild>
+                        <div className="relative group cursor-pointer active:scale-[0.98] transition-all duration-150">
+                            <div className="relative bg-gradient-to-br from-[#d60000] via-[#c20000] to-[#8b0000] rounded-[26px] p-5 flex items-center justify-between overflow-hidden shadow-[0_8px_30px_rgba(214,0,0,0.35)] border border-red-400/20">
+                                {/* Subtle Light Reflection overlay */}
+                                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent pointer-events-none" />
 
-                                <div className="flex items-center justify-between w-full">
-                                    <div className="flex items-center gap-5 pl-2">
-                                        <div className="w-[52px] h-[52px] rounded-2xl bg-[#2a1114] flex items-center justify-center text-[#ff3333]">
-                                            <Spade size={28} />
-                                        </div>
-                                        <div className="flex flex-col gap-1.5">
-                                            <div className="flex items-center">
-                                                <span className="text-[10px] font-bold tracking-wider bg-[#2a1114] text-[#ff3333] px-2.5 py-1 rounded-md uppercase">
-                                                    Tiến Lên
-                                                </span>
-                                            </div>
-                                            <div className="text-[11px] text-gray-400 font-semibold tracking-wide">
-                                                {item.players.length} NGƯỜI •
-                                                VÁN {roundCount}
-                                            </div>
-                                            <div className="text-[20px] font-bold text-white leading-none mt-0.5">
-                                                {item.time}
-                                            </div>
-                                        </div>
+                                <div className="relative z-10 flex items-center gap-4">
+                                    <div className="w-16 h-16 rounded-2xl bg-white/95 p-2 flex items-center justify-center shadow-lg shadow-black/20 shrink-0">
+                                        <img
+                                            className="w-full h-full object-contain"
+                                            src={pokerIcon}
+                                            alt="playing-cards"
+                                        />
                                     </div>
-
-                                    {/* Action button: Delete */}
-                                    <div
-                                        className="relative z-20"
-                                        onClick={(e) => e.stopPropagation()}
-                                    >
-                                        <AlertDialog>
-                                            <AlertDialogTrigger asChild>
-                                                <Button
-                                                    variant="ghost"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                    }}
-                                                    className="text-gray-400 hover:text-red-400 hover:bg-red-950/20 rounded-xl h-12 w-12 flex items-center justify-center mr-2"
-                                                >
-                                                    <Trash2 size={24} className="size-6" />
-                                                </Button>
-                                            </AlertDialogTrigger>
-                                            <AlertDialogContent
-                                                size="sm"
-                                                onClick={(e) =>
-                                                    e.stopPropagation()
-                                                }
-                                            >
-                                                <AlertDialogHeader>
-                                                    <AlertDialogMedia className="bg-[#ff3333]/10 text-[#ff3333]">
-                                                        <Trash2 size={20} />
-                                                    </AlertDialogMedia>
-                                                    <AlertDialogTitle>
-                                                        Xóa ván chơi?
-                                                    </AlertDialogTitle>
-                                                    <AlertDialogDescription>
-                                                        Hành động này sẽ xóa
-                                                        vĩnh viễn ván chơi này
-                                                        và không thể hoàn tác.
-                                                    </AlertDialogDescription>
-                                                </AlertDialogHeader>
-                                                <AlertDialogFooter>
-                                                    <AlertDialogCancel
-                                                        variant="outline"
-                                                        onClick={(e) =>
-                                                            e.stopPropagation()
-                                                        }
-                                                    >
-                                                        Hủy
-                                                    </AlertDialogCancel>
-                                                    <AlertDialogAction
-                                                        variant="destructive"
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleDeleteGame(
-                                                                item.id,
-                                                            );
-                                                        }}
-                                                    >
-                                                        Xóa
-                                                    </AlertDialogAction>
-                                                </AlertDialogFooter>
-                                            </AlertDialogContent>
-                                        </AlertDialog>
+                                    <div className="flex flex-col">
+                                        <span className="text-2xl font-black text-white tracking-tight leading-tight">
+                                            Tạo Ván Mới
+                                        </span>
+                                        <span className="text-xs font-medium text-red-100/80 mt-0.5">
+                                            Chọn luật & thiết lập người chơi
+                                        </span>
                                     </div>
                                 </div>
 
-                                {/* Players List */}
-                                {playerScores.length > 0 && (
-                                    <div className="border-t border-white/5 pt-3 flex flex-col gap-2.5 pl-2 pr-2">
-                                        {playerScores.map(({ player, score }) => (
-                                            <div
-                                                key={player.id}
-                                                className="flex items-center justify-between"
-                                            >
-                                                <span className="text-sm font-semibold text-gray-300">
-                                                    {player.name}
-                                                </span>
-                                                <span
-                                                    className={`text-xs font-bold px-2 py-0.5 rounded-lg border font-mono ${
-                                                        score > 0
-                                                            ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/10"
-                                                            : score < 0
-                                                              ? "bg-[#ff3333]/10 text-[#ff3333] border-[#ff3333]/10"
-                                                              : "bg-gray-500/10 text-gray-400 border-gray-500/10"
-                                                    }`}
-                                                >
-                                                    {score > 0
-                                                        ? `+${score}`
-                                                        : score}
-                                                </span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
+                                <div className="relative z-10 w-11 h-11 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white border border-white/30 shrink-0 shadow-inner">
+                                    <Plus size={24} strokeWidth={3} />
+                                </div>
                             </div>
-                        );
-                    })
-                )}
+                        </div>
+                    </DrawerTrigger>
+                    <DrawerContent className="bg-[#0c101b] border-white/10 outline-none overflow-hidden p-0 max-h-[90vh]">
+                        <CreateGameDrawer />
+                    </DrawerContent>
+                </Drawer>
+
+                {/* Game History Section */}
+                <div className="flex flex-col gap-3 mt-1">
+                    <div className="flex items-center justify-between px-1">
+                        <div className="flex items-center gap-2">
+                            <History size={16} className="text-gray-400" />
+                            <h2 className="text-xs font-bold uppercase tracking-wider text-gray-400">
+                                Lịch sử các bàn chơi
+                            </h2>
+                        </div>
+                        {games.length > 0 && (
+                            <span className="text-[11px] text-gray-500 font-medium">
+                                Chạm để tiếp tục
+                            </span>
+                        )}
+                    </div>
+
+                    {games.length === 0 ? (
+                        /* Empty State */
+                        <div className="flex flex-col items-center justify-center py-14 px-6 border border-dashed border-white/10 rounded-[28px] bg-gradient-to-b from-white/[0.02] to-transparent gap-4 text-center mt-2">
+                            <div className="w-16 h-16 rounded-2xl bg-red-950/30 border border-red-500/20 flex items-center justify-center text-red-400 shadow-[0_0_30px_rgba(239,68,68,0.15)]">
+                                <Spade size={32} />
+                            </div>
+                            <div className="flex flex-col items-center gap-1.5">
+                                <h3 className="text-base font-bold text-white">
+                                    Chưa có bàn chơi nào
+                                </h3>
+                                <p className="text-xs text-gray-400 max-w-[220px] leading-relaxed">
+                                    Nhấn <span className="text-red-400 font-semibold">Tạo Ván Mới</span> để bắt đầu tính điểm cùng bạn bè ngay!
+                                </p>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="flex flex-col gap-3">
+                            {games.map((item) => {
+                                const roundCount = item.history?.length || 0;
+                                const playerScores = (item.players || []).map((player) => {
+                                    const score = (item.history || []).reduce(
+                                        (sum: number, round: any) => {
+                                            const roundScores = round.scores || round;
+                                            return (
+                                                sum +
+                                                (roundScores[player.id] ??
+                                                    roundScores[player.name] ??
+                                                    0)
+                                            );
+                                        },
+                                        0
+                                    );
+                                    return { player, score };
+                                });
+
+                                // Find highest score leader
+                                const topScorer = playerScores.length > 0 && roundCount > 0
+                                    ? [...playerScores].sort((a, b) => b.score - a.score)[0]
+                                    : null;
+
+                                return (
+                                    <div
+                                        key={item.id}
+                                        onClick={() => navigate(`/room?id=${item.id}`)}
+                                        className="bg-[#111624] hover:bg-[#161c2e] border border-white/[0.07] rounded-3xl p-4 flex flex-col gap-3.5 relative overflow-hidden cursor-pointer active:scale-[0.98] transition-all shadow-md shadow-black/30 group"
+                                    >
+                                        {/* Left accent pill */}
+                                        <div className="absolute left-0 top-4 bottom-4 w-1 bg-gradient-to-b from-red-500 to-rose-600 rounded-r-full" />
+
+                                        {/* Card Top Row */}
+                                        <div className="flex items-center justify-between w-full pl-2">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-11 h-11 rounded-2xl bg-red-950/40 border border-red-500/20 flex items-center justify-center text-red-400 shrink-0">
+                                                    <Spade size={22} />
+                                                </div>
+                                                <div className="flex flex-col">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-sm font-bold text-white leading-tight">
+                                                            Tiến Lên Miền Nam
+                                                        </span>
+                                                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                                            {roundCount} ván
+                                                        </span>
+                                                    </div>
+                                                    <span className="text-[11px] font-mono text-gray-400 mt-0.5">
+                                                        {item.time}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            {/* Action Button: Delete Game */}
+                                            <div
+                                                className="relative z-20 flex items-center gap-1"
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
+                                                <AlertDialog>
+                                                    <AlertDialogTrigger asChild>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            onClick={(e) => e.stopPropagation()}
+                                                            className="text-gray-400 hover:text-red-400 hover:bg-red-950/30 rounded-xl h-10 w-10 flex items-center justify-center"
+                                                        >
+                                                            <Trash2 size={18} />
+                                                        </Button>
+                                                    </AlertDialogTrigger>
+                                                    <AlertDialogContent
+                                                        size="sm"
+                                                        className="bg-[#0f1422] border-white/10 text-white rounded-3xl p-6"
+                                                        onClick={(e) => e.stopPropagation()}
+                                                    >
+                                                        <AlertDialogHeader>
+                                                            <AlertDialogMedia className="bg-red-500/10 text-red-500 mx-auto">
+                                                                <Trash2 size={24} />
+                                                            </AlertDialogMedia>
+                                                            <AlertDialogTitle className="text-center text-white text-lg font-bold">
+                                                                Xóa bàn chơi?
+                                                            </AlertDialogTitle>
+                                                            <AlertDialogDescription className="text-center text-gray-400 text-xs">
+                                                                Toàn bộ lịch sử điểm số của bàn này sẽ bị xóa vĩnh viễn và không thể khôi phục.
+                                                            </AlertDialogDescription>
+                                                        </AlertDialogHeader>
+                                                        <AlertDialogFooter className="flex gap-2.5 mt-2">
+                                                            <AlertDialogCancel
+                                                                variant="outline"
+                                                                className="flex-1 rounded-xl h-11 bg-white/5 border-white/10 text-white hover:bg-white/10"
+                                                                onClick={(e) => e.stopPropagation()}
+                                                            >
+                                                                Hủy
+                                                            </AlertDialogCancel>
+                                                            <AlertDialogAction
+                                                                variant="destructive"
+                                                                className="flex-1 rounded-xl h-11 bg-red-600 hover:bg-red-500 text-white font-bold"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    handleDeleteGame(item.id);
+                                                                }}
+                                                            >
+                                                                Xóa
+                                                            </AlertDialogAction>
+                                                        </AlertDialogFooter>
+                                                    </AlertDialogContent>
+                                                </AlertDialog>
+
+                                                <div className="w-8 h-8 rounded-full flex items-center justify-center text-gray-500 group-hover:text-white transition-colors">
+                                                    <ChevronRight size={18} />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Player Scores Mini Row */}
+                                        {playerScores.length > 0 && (() => {
+                                            const isRevealed = !!revealedGames[item.id];
+                                            return (
+                                                <div className="border-t border-white/[0.06] pt-2.5 pl-2 flex items-center justify-between gap-2 flex-wrap">
+                                                    <div className="flex items-center gap-1.5 flex-wrap flex-1">
+                                                        {playerScores.map(({ player, score }) => {
+                                                            const isLeader =
+                                                                isRevealed &&
+                                                                topScorer &&
+                                                                topScorer.player.id === player.id &&
+                                                                topScorer.score > 0;
+                                                            return (
+                                                                <div
+                                                                    key={player.id}
+                                                                    className="flex items-center gap-1.5 bg-[#0a0d16] px-2.5 py-1 rounded-xl border border-white/5"
+                                                                >
+                                                                    {isLeader && (
+                                                                        <span className="text-[10px]">👑</span>
+                                                                    )}
+                                                                    <span className="text-[12px] font-bold text-gray-300 max-w-[80px] truncate">
+                                                                        {player.name}
+                                                                    </span>
+                                                                    {isRevealed && (
+                                                                        <span
+                                                                            className={`text-[11px] font-black font-mono ${
+                                                                                score > 0
+                                                                                    ? "text-emerald-400"
+                                                                                    : score < 0
+                                                                                      ? "text-rose-400"
+                                                                                      : "text-gray-400"
+                                                                            }`}
+                                                                        >
+                                                                            {score > 0 ? `+${score}` : score}
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+
+                                                    {/* Reveal Scores Toggle Button */}
+                                                    <button
+                                                        type="button"
+                                                        onClick={(e) => toggleRevealGame(item.id, e)}
+                                                        className="flex items-center gap-1 px-2.5 py-1 rounded-xl text-[11px] font-bold bg-white/5 hover:bg-white/10 text-amber-400 border border-amber-400/25 active:scale-95 transition-all shrink-0"
+                                                    >
+                                                        {isRevealed ? (
+                                                            <>
+                                                                <EyeOff size={13} />
+                                                                <span>Ẩn điểm</span>
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <Eye size={13} />
+                                                                <span>Xem điểm</span>
+                                                            </>
+                                                        )}
+                                                    </button>
+                                                </div>
+                                            );
+                                        })()}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );
